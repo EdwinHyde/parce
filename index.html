@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>I.E. Antonio Nariño — Iniciar Sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style_login.css">
+  <link rel="icon" href="https://i.postimg.cc/QxCM5Y1b/icono-logo-favico.png">
+</head>
+<body>
+
+  <div class="panel-left">
+    <div class="panel-left-inner">
+      <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" alt="Escudo I.E. Antonio Nariño" />
+      <h1>Institución Educativa<br>Antonio Nariño</h1>
+      <p>Programa para la Administración y Registro de Calificaciones Estudiantiles</p>
+      <div class="motto-badges">
+        <span class="motto-badge">SABER</span>
+        <span class="motto-badge">HACER</span>
+        <span class="motto-badge">SER</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="panel-divider"></div>
+
+    <div class="form-wrap">
+      <div class="mobile-header">
+        <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" alt="Escudo" />
+        <h2>Institución Educativa<br>Antonio Nariño</h2>
+        <p>Sistema Académico Institucional</p>
+        <div class="mobile-badges">
+          <span class="mobile-badge">SABER</span>
+          <span class="mobile-badge">HACER</span>
+          <span class="mobile-badge">SER</span>
+        </div>
+      </div>
+
+      <h2 class="form-title">Bienvenido</h2>
+      <p class="form-subtitle">Ingresa tus datos para continuar</p>
+
+      <div class="error-msg" id="error-msg">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="error-text">Usuario o contraseña incorrectos.</span>
+      </div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="username">Usuario</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="username" name="username" placeholder="Tu nombre de usuario" required autocomplete="username" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="password" name="password" placeholder="Tu contraseña" required autocomplete="current-password" />
+            <button type="button" class="eye-toggle" id="eye-toggle" aria-label="Mostrar contraseña">
+              <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="btn-login">
+          <div class="btn-inner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Ingresar
+          </div>
+          <div class="spinner"></div>
+        </button>
+      </form>
+
+      <div class="forgot-link">
+        <a href="#" id="forgot-link">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <div class="form-footer">
+        P.A.R.C.E © 2026 
+        <br><i>Desarrollado por Edwin Chica</i>
+      </div>
+    </div>
+  </div>
+
+  <script src="script_login.js"></script>
+</body>
+</html>

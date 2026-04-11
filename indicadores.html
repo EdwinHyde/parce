@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Indicadores de Logro — I.E. Antonio Nariño</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style_indicadores.css" />
+  <link rel="icon" href="https://i.postimg.cc/QxCM5Y1b/icono-logo-favico.png" />
+</head>
+<body>
+
+  <!-- ══ HEADER ══ -->
+  <header class="main-header">
+    <div class="header-content">
+      <div class="brand">
+        <button class="btn-back" id="btn-back" title="Volver al panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" alt="Escudo IEAN" class="header-logo" />
+        <span class="brand-text">Indicadores de Logro</span>
+      </div>
+      <div class="header-docente">
+        <div class="docente-info">
+          <span id="header-nombre">Docente</span>
+          <span class="header-sede" id="header-sede"></span>
+        </div>
+        <button class="btn-logout" id="btn-logout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Salir
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ CONTENIDO PRINCIPAL ══ -->
+  <main class="main-container">
+
+    <!-- ── Estado: cargando inicial ── -->
+    <div class="state-panel" id="state-loading-init">
+      <div class="loading-ring"></div>
+      <p>Cargando información del docente...</p>
+    </div>
+
+    <!-- ── Estado: sin asignaturas ── -->
+    <div class="state-panel" id="state-sin-asignaturas" style="display:none;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p>No tienes asignaturas asignadas en el sistema.</p>
+    </div>
+
+    <!-- ── Panel principal (se muestra cuando hay datos) ── -->
+    <div id="panel-principal" style="display:none;">
+
+      <!-- Selector de periodo -->
+      <div class="periodo-selector-wrap">
+        <div class="periodo-selector">
+          <label class="periodo-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Periodo académico
+          </label>
+          <div class="periodo-tabs" id="periodo-tabs">
+            <button class="periodo-tab" data-periodo="1">Periodo 1</button>
+            <button class="periodo-tab" data-periodo="2">Periodo 2</button>
+            <button class="periodo-tab" data-periodo="3">Periodo 3</button>
+            <button class="periodo-tab" data-periodo="4">Periodo 4</button>
+          </div>
+        </div>
+
+        <!-- Badge de estado del periodo -->
+        <div class="periodo-estado" id="periodo-estado" style="display:none;">
+          <span class="badge-estado" id="badge-estado-texto"></span>
+        </div>
+      </div>
+
+      <!-- Banner de bloqueo (visible cuando el periodo está cerrado) -->
+      <div class="banner-bloqueado" id="banner-bloqueado" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span id="banner-bloqueado-msg">Periodo cerrado — solo lectura</span>
+      </div>
+
+      <!-- Pestañas de grados -->
+      <div class="grados-tabs-wrap">
+        <div class="grados-tabs" id="grados-tabs">
+          <!-- Se generan dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Área de contenido: asignaturas + indicadores -->
+      <div class="contenido-wrap" id="contenido-wrap">
+
+        <!-- Estado cargando indicadores -->
+        <div class="state-panel state-inline" id="state-loading-indicadores" style="display:none;">
+          <div class="loading-ring"></div>
+          <p>Cargando indicadores...</p>
+        </div>
+
+        <!-- Tarjeta principal con la tabla de indicadores -->
+        <div class="indicadores-card" id="indicadores-card" style="display:none;">
+
+          <div class="card-header-indicadores">
+            <div class="card-header-info">
+              <h2 class="card-titulo" id="card-titulo">Indicadores de logro</h2>
+              <p class="card-subtitulo" id="card-subtitulo"></p>
+            </div>
+            <button class="btn-guardar" id="btn-guardar" style="display:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Guardar indicadores
+            </button>
+          </div>
+
+          <!-- Mensaje de estado del guardado -->
+          <div class="save-msg" id="save-msg" style="display:none;"></div>
+
+          <!-- Instrucción -->
+          <div class="instruccion" id="instruccion">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="8"/>
+              <line x1="12" y1="12" x2="12" y2="16"/>
+            </svg>
+            Escribe el indicador de logro para cada asignatura en este grado y periodo. El texto debe describir lo que el estudiante debe demostrar saber, hacer o ser al finalizar el periodo.
+          </div>
+
+          <!-- Tabla de indicadores -->
+          <div class="tabla-indicadores-wrap">
+            <table class="tabla-indicadores" id="tabla-indicadores">
+              <thead>
+                <tr>
+                  <th class="th-asig">Asignatura</th>
+                  <th class="th-indicador">Indicador de Logro</th>
+                  <th class="th-estado">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-indicadores">
+                <!-- Se genera dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Barra inferior de guardado -->
+          <div class="save-bar" id="save-bar" style="display:none;">
+            <div class="save-bar-inner">
+              <div class="save-status" id="save-status"></div>
+              <button class="btn-guardar btn-guardar-bottom" id="btn-guardar-bottom">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Guardar todo
+              </button>
+            </div>
+          </div>
+
+        </div>
+        <!-- /indicadores-card -->
+
+      </div>
+      <!-- /contenido-wrap -->
+
+    </div>
+    <!-- /panel-principal -->
+
+  </main>
+
+  <footer class="app-footer">
+    P.A.R.C.E  © 2026 · Desarrollado por Edwin Chica
+  </footer>
+
+  <script src="script_indicadores.js"></script>
+</body>
+</html>

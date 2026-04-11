@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Panel Docente — I.E. Antonio Nariño</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style_docente.css">
+  <link rel="icon" href="https://i.postimg.cc/QxCM5Y1b/icono-logo-favico.png">
+</head>
+<body>
+
+  <header class="main-header">
+    <div class="header-content">
+      <div class="brand">
+        <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" alt="Escudo IEAN" class="header-logo" />
+        <div class="brand-text">
+          <span class="brand-sigla">P.A.R.C.E</span>
+          <span class="brand-desc">Programa para la Administración y Registro de Calificaciones Estudiantiles</span>
+    </div>
+      </div>
+      <button class="btn-logout" id="btn-logout">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- Bienvenida -->
+    <section class="welcome-section">
+      <div class="welcome-text">
+        <h1>Hola, <span class="highlight-name" id="nombre-docente">Docente</span></h1>
+        <p class="sede-info">Sede: <span id="perfil-sede">Cargando...</span></p>
+      </div>
+      <div class="role-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Docente
+      </div>
+    </section>
+
+    <!-- Módulos -->
+    <section class="actions-section">
+      <p class="section-title">Módulos</p>
+      <div class="grid-actions">
+
+        <button class="action-card" data-modulo="calificaciones">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <span class="card-label">Ingresar Calificaciones</span>
+          <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </button>
+
+        <button class="action-card" data-modulo="asistencia">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <span class="card-label">Registrar Asistencia</span>
+          <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </button>
+
+        <button class="action-card" data-modulo="indicadores">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <span class="card-label">Logros e Indicadores</span>
+          <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </button>
+
+        <button class="action-card" data-modulo="observaciones" id="btn-modulo-observaciones">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <span class="card-label">Observaciones</span>
+          <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- Stats + Avisos -->
+    <div class="bottom-row">
+
+      <div>
+        <p class="section-title">Resumen</p>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Año lectivo</span>
+            <span class="stat-value" id="stat-anio">—</span>
+            <span class="stat-sub">en curso</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Periodo</span>
+            <span class="stat-value" id="stat-periodo">—</span>
+            <span class="stat-sub" id="stat-periodo-sub">verificando...</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Dirección de grado</span>
+            <span class="stat-value" id="stat-direccion">—</span>
+            <span class="stat-sub" id="stat-direccion-sub">verificando...</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Estudiantes</span>
+            <span class="stat-value" id="stat-estudiantes">—</span>
+            <span class="stat-sub">activos en tus clases</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avisos -->
+      <div class="notifications-section">
+        <p class="section-title">Avisos Recientes</p>
+        <div class="notifications-container" id="notificaciones-container">
+          <div class="notification-item empty" id="notif-empty">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <p>No tienes notificaciones nuevas.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ ALERTA: NOTAS BAJAS ══ -->
+    <section id="seccion-notas-bajas" style="display:none;">
+      <div class="alerta-header">
+        <div class="alerta-titulo-wrap">
+          <div class="alerta-icono-titulo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>Estudiantes con desempeño bajo</span>
+          </div>
+          <span class="alerta-badge" id="alerta-conteo">—</span>
+        </div>
+        <div class="alerta-filtros">
+          <select class="alerta-select" id="filtro-grado-bajas">
+            <option value="">Todos los grados</option>
+          </select>
+          <select class="alerta-select" id="filtro-periodo-bajas">
+            <option value="">Todos los periodos</option>
+            <option value="1">Periodo 1</option>
+            <option value="2">Periodo 2</option>
+            <option value="3">Periodo 3</option>
+            <option value="4">Periodo 4</option>
+          </select>
+        </div>
+      </div>
+      <!-- Loading estado -->
+      <div id="alerta-loading" class="alerta-loading">
+        <div class="alerta-ring"></div>
+        <span>Analizando calificaciones...</span>
+      </div>
+      <!-- Tabla de notas bajas -->
+      <div id="alerta-tabla-wrap" style="display:none;">
+        <table class="tabla-alerta" id="tabla-notas-bajas">
+          <thead>
+            <tr>
+              <th>Estudiante</th>
+              <th>Grado</th>
+              <th>Asignatura</th>
+              <th>Periodo</th>
+              <th>Promedio</th>
+              <th>Desempeño</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-notas-bajas"></tbody>
+        </table>
+      </div>
+      <!-- Sin notas bajas -->
+      <div id="alerta-vacia" class="alerta-vacia" style="display:none;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <p>¡Excelente! Ninguno de tus estudiantes tiene desempeño bajo en el periodo seleccionado.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══ PANEL OBSERVACIONES ══ -->
+  <div id="obs-overlay" class="obs-overlay" style="display:none;" aria-modal="true" role="dialog">
+    <div class="obs-panel">
+
+      <!-- Encabezado del panel -->
+      <div class="obs-panel-header">
+        <div class="obs-header-left">
+          <div class="obs-header-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="obs-panel-title">Observaciones</h2>
+            <p class="obs-panel-sub">Registro de observaciones por estudiante</p>
+          </div>
+        </div>
+        <button class="obs-btn-close" id="obs-btn-close" aria-label="Cerrar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs: Nueva observación / Consultar -->
+      <div class="obs-tabs">
+        <button class="obs-tab obs-tab-active" id="obs-tab-nueva" data-tab="nueva">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Nueva observación
+        </button>
+        <button class="obs-tab" id="obs-tab-consultar" data-tab="consultar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Consultar observaciones
+        </button>
+      </div>
+
+      <!-- ── TAB: NUEVA OBSERVACIÓN ── -->
+      <div id="obs-content-nueva" class="obs-tab-content">
+
+        <!-- Cargando datos -->
+        <div id="obs-loading" class="obs-state-msg">
+          <div class="obs-spinner"></div>
+          <span>Cargando datos del docente...</span>
+        </div>
+
+        <!-- Formulario -->
+        <div id="obs-form-wrap" style="display:none;">
+
+          <!-- Fila: Periodo · Grado · Asignatura -->
+          <div class="obs-form-row obs-form-row-3">
+            <div class="obs-field">
+              <label class="obs-label">Periodo</label>
+              <select class="obs-select" id="obs-select-periodo">
+                <option value="">Seleccionar...</option>
+                <option value="1">Periodo 1</option>
+                <option value="2">Periodo 2</option>
+                <option value="3">Periodo 3</option>
+                <option value="4">Periodo 4</option>
+              </select>
+            </div>
+            <div class="obs-field">
+              <label class="obs-label">Grado</label>
+              <select class="obs-select" id="obs-select-grado">
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="obs-field">
+              <label class="obs-label">Asignatura</label>
+              <select class="obs-select" id="obs-select-asignatura">
+                <option value="">— elige grado primero —</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Selector de estudiante -->
+          <div class="obs-field obs-field-full" id="obs-field-estudiante" style="display:none;">
+            <label class="obs-label">Estudiante</label>
+            <div class="obs-estudiante-search">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" class="obs-input-search" id="obs-buscar-est" placeholder="Buscar estudiante..." autocomplete="off">
+            </div>
+            <div class="obs-lista-est" id="obs-lista-est" style="display:none;"></div>
+            <div class="obs-est-seleccionado" id="obs-est-chip" style="display:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span id="obs-est-nombre-chip"></span>
+              <button class="obs-chip-clear" id="obs-chip-clear">✕</button>
+            </div>
+          </div>
+
+          <!-- Tipo de registro -->
+          <div class="obs-field obs-field-full" id="obs-field-texto" style="display:none;">
+
+            <div class="obs-tipo-selector" id="obs-tipo-selector">
+              <button class="obs-tipo-btn obs-tipo-activo" id="obs-tipo-obs" data-tipo="Observación">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Observación
+              </button>
+              <button class="obs-tipo-btn" id="obs-tipo-fel" data-tipo="Felicitación">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+                Felicitación
+              </button>
+            </div>
+
+            <label class="obs-label" style="margin-top:14px;">
+              <span id="obs-label-texto">Observación</span>
+              <span class="obs-char-count" id="obs-char-count">0 / 500</span>
+            </label>
+            <textarea
+              class="obs-textarea"
+              id="obs-textarea"
+              placeholder="Escriba aquí la observación sobre el estudiante..."
+              maxlength="500"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <!-- Botón guardar -->
+          <div id="obs-action-wrap" style="display:none;">
+            <div class="obs-preview-info" id="obs-preview-info"></div>
+            <button class="obs-btn-guardar" id="obs-btn-guardar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span id="obs-btn-texto">Guardar observación</span>
+            </button>
+          </div>
+
+          <!-- Feedback -->
+          <div class="obs-feedback" id="obs-feedback" style="display:none;"></div>
+
+        </div>
+      </div>
+
+      <!-- ── TAB: CONSULTAR ── -->
+      <div id="obs-content-consultar" class="obs-tab-content" style="display:none;">
+
+        <!-- Filtros de consulta -->
+        <div class="obs-consulta-filtros">
+          <div class="obs-field">
+            <label class="obs-label">Grado</label>
+            <select class="obs-select" id="obs-filtro-grado">
+              <option value="">Todos los grados</option>
+            </select>
+          </div>
+          <div class="obs-field">
+            <label class="obs-label">Periodo</label>
+            <select class="obs-select" id="obs-filtro-periodo">
+              <option value="">Todos</option>
+              <option value="1">Periodo 1</option>
+              <option value="2">Periodo 2</option>
+              <option value="3">Periodo 3</option>
+              <option value="4">Periodo 4</option>
+            </select>
+          </div>
+          <div class="obs-field obs-field-busqueda">
+            <label class="obs-label">Buscar estudiante</label>
+            <input type="text" class="obs-input-filter" id="obs-filtro-nombre" placeholder="Nombre o ID...">
+          </div>
+        </div>
+
+        <!-- Estado cargando -->
+        <div id="obs-consulta-loading" class="obs-state-msg" style="display:none;">
+          <div class="obs-spinner"></div>
+          <span>Cargando observaciones...</span>
+        </div>
+
+        <!-- Lista de observaciones -->
+        <div id="obs-lista-registros" class="obs-lista-registros"></div>
+
+        <!-- Vacío -->
+        <div id="obs-consulta-vacia" class="obs-consulta-vacia" style="display:none;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>No hay observaciones registradas con los filtros seleccionados.</p>
+        </div>
+
+      </div>
+
+    </div><!-- /.obs-panel -->
+  </div><!-- /#obs-overlay -->
+
+  <footer class="app-footer">
+    P.A.R.C.E  © 2026 · Desarrollado por Edwin Chica
+  </footer>
+
+  <script src="script_docente.js"></script>
+</body>
+</html>

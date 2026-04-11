@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Panel Administrador — I.E. Antonio Nariño</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="https://i.postimg.cc/QxCM5Y1b/icono-logo-favico.png"/>
+  <link rel="stylesheet" href="style_admin.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" alt="Escudo"/>
+      <div class="sidebar-brand-text">
+        <strong>P.A.R.C.E</strong>
+        <span>Programa para la Administración y</span>
+        <span>Registro de Calificaciones Estudiantiles</span>
+      </div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar" id="sidebar-avatar">A</div>
+      <div class="profile-info">
+        <strong id="sidebar-nombre">Administrador</strong>
+        <span>Administrador</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <div class="nav-section-label">Principal</div>
+
+      <button class="nav-item active" data-page="dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Panel de Control
+      </button>
+
+      <div class="nav-section-label">Gestión</div>
+
+      <button class="nav-item" data-page="usuarios">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Docentes
+      </button>
+
+      <button class="nav-item" data-page="estudiantes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        Estudiantes
+      </button>
+
+      <button class="nav-item" data-page="periodos">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Periodos
+      </button>
+
+      <button class="nav-item" data-page="sedes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Sedes y Grados
+      </button>
+
+      <div class="nav-section-label">Académico</div>
+
+      <button class="nav-item" data-page="consolidado">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Consolidado
+      </button>
+      
+      <button class="nav-item" data-page="boletines">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Boletines
+      </button>
+      
+
+      <div class="nav-section-label">Comunicación</div>
+
+      <button class="nav-item" data-page="avisos">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        Avisos
+        <span class="nav-badge" id="badge-avisos" style="display:none">0</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-logout">
+      <button class="btn-sidebar-logout" id="btn-logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- Overlay móvil -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ══ ÁREA PRINCIPAL ══ -->
+  <div class="main-area">
+
+    <!-- Top header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="btn-menu-toggle" id="btn-menu-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <h1 class="page-title" id="page-title">Panel de Control</h1>
+      </div>
+      <div class="header-right">
+        <span class="header-badge-admin">Administrador</span>
+      </div>
+    </header>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: DASHBOARD
+    ══════════════════════════════════════ -->
+    <div class="page-content active" id="page-dashboard">
+
+      <!-- Banner periodo activo -->
+      <div class="periodo-card" id="dash-periodo-card">
+        <div class="periodo-card-text">
+          <strong id="dash-periodo-titulo">Cargando...</strong>
+          <span id="dash-periodo-sub">verificando fechas del sistema</span>
+        </div>
+        <div class="periodo-badges" id="dash-periodo-badges"></div>
+      </div>
+
+      <!-- Tarjetas de alerta -->
+      <div class="stats-row">
+
+        <!-- Estudiantes en riesgo -->
+        <div class="stat-card danger">
+          <div class="stat-card-label">⚠️ Estudiantes en riesgo</div>
+          <div class="stat-card-value" id="dash-en-riesgo">—</div>
+          <div class="stat-card-sub" id="dash-en-riesgo-sub">con promedio &lt; 3.0</div>
+        </div>
+
+        <!-- Estudiante con más fallas -->
+        <div class="stat-card warning">
+          <div class="stat-card-label">🚨 Mayor ausentismo</div>
+          <div class="stat-card-value dash-nombre-valor" id="dash-mas-fallas-nombre">—</div>
+          <div class="stat-card-sub" id="dash-mas-fallas-sub">cargando...</div>
+        </div>
+
+        <!-- Grado con más riesgo -->
+        <div class="stat-card accent">
+          <div class="stat-card-label">📋 Grado con más riesgo</div>
+          <div class="stat-card-value" id="dash-grado-riesgo">—</div>
+          <div class="stat-card-sub" id="dash-grado-riesgo-sub">estudiantes en BAJO</div>
+        </div>
+
+        <!-- Estudiante con más asignaturas en BAJO -->
+        <div class="stat-card" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);border:none;color:white;">
+          <div class="stat-card-label" style="color:rgba(255,255,255,0.75);">🎯 Mayor riesgo de pérdida</div>
+          <div class="stat-card-value dash-nombre-valor" id="dash-mas-bajo-nombre" style="color:white;">—</div>
+          <div class="stat-card-sub" id="dash-mas-bajo-sub" style="color:rgba(255,255,255,0.65);">asignaturas en BAJO</div>
+        </div>
+
+      </div>
+
+      <!-- Sección inferior: 3 columnas -->
+      <div class="dash-bottom-grid">
+
+        <!-- Columna izquierda: Semáforo por grado + Barras -->
+        <div class="dash-col-wide">
+          <div class="card" style="margin-bottom:24px;">
+            <div class="card-header">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Semáforo académico por grado
+              </span>
+            </div>
+            <div class="card-body" id="dash-semaforo">
+              <div class="module-loading"><div class="ring-loader"></div><p>Cargando...</p></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                Promedio por grado — Periodo actual
+              </span>
+            </div>
+            <div class="card-body" id="dash-barras">
+              <div class="module-loading"><div class="ring-loader"></div><p>Cargando...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Top 3 -->
+        <div class="dash-col-narrow">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Top 3 — Mejores promedios
+              </span>
+            </div>
+            <div class="card-body" id="dash-top3">
+              <div class="module-loading"><div class="ring-loader"></div><p>Cargando...</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: USUARIOS
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-usuarios">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Lista de Docentes
+          </span>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select class="form-select" id="filtro-rol-usuario" style="width:140px;padding:7px 10px;font-size:13px;">
+              <option value="">Todos los roles</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Docente">Docente</option>
+              <option value="Estudiante">Estudiante</option>
+              <option value="Acudiente">Acudiente</option>
+            </select>
+            <button class="btn btn-primary btn-sm" id="btn-nuevo-usuario">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar Docente
+            </button>
+          </div>
+        </div>
+        <div id="tabla-usuarios-wrap">
+          <div class="module-loading"><div class="ring-loader"></div><p>Cargando usuarios...</p></div>
+        </div>
+      </div>
+
+      <!-- Formulario nuevo/editar usuario (oculto por defecto) -->
+      <div class="card" id="form-usuario-card" style="display:none;">
+        <div class="card-header">
+          <span class="card-title" id="form-usuario-title">Nuevo usuario</span>
+          <button class="btn btn-outline btn-sm" id="btn-cancelar-usuario">Cancelar</button>
+        </div>
+        <div class="card-body">
+          <div id="msg-usuario" class="msg"></div>
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Nombre completo</label>
+              <input type="text" class="form-input" id="u-nombre" placeholder="Nombre y apellidos"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Documento de Identidad</label>
+              <input type="text" class="form-input" id="u-id" readonly placeholder="Documento"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Usuario</label>
+              <input type="text" class="form-input" id="u-usuario" placeholder="Nombre de usuario para iniciar sesión"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contraseña</label>
+              <input type="text" class="form-input" id="u-password" placeholder="Establezca una contraseña"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rol</label>
+              <select class="form-select" id="u-rol">
+                <option value="Docente">Docente</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Estudiante">Estudiante</option>
+                <option value="Acudiente">Acudiente</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sede</label>
+              <select class="form-select" id="u-sede">
+                <option value="">Seleccionar sede</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-input" id="u-telefono" placeholder="Número de teléfono"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="u-estado">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>            
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+            <button class="btn btn-primary" id="btn-guardar-usuario">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: ESTUDIANTES
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-estudiantes">
+
+      <!-- Tabla de estudiantes -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg>
+            Estudiantes matriculados
+          </span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="text" class="form-input" id="busqueda-est" placeholder="Buscar por nombre..." style="width:175px;padding:7px 10px;font-size:13px;">
+            <select class="form-select" id="filtro-sede-est" style="width:130px;padding:7px 10px;font-size:13px;">
+              <option value="">Todas las sedes</option>
+            </select>
+            <select class="form-select" id="filtro-grado-est" style="width:130px;padding:7px 10px;font-size:13px;">
+              <option value="">Todos los grados</option>
+            </select>
+            <select class="form-select" id="filtro-estado-est" style="width:120px;padding:7px 10px;font-size:13px;">
+              <option value="">Todos</option>
+              <option value="activo">Activos</option>
+              <option value="inactivo">Inactivos</option>
+            </select>
+            <button class="btn btn-primary btn-sm" id="btn-nuevo-estudiante">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar estudiante
+            </button>
+          </div>
+        </div>
+        <div id="tabla-estudiantes-wrap">
+          <div class="module-loading"><div class="ring-loader"></div><p>Cargando estudiantes...</p></div>
+        </div>
+      </div>
+
+      <!-- Formulario nuevo / editar estudiante (oculto por defecto) -->
+      <div class="card" id="form-estudiante-card" style="display:none;">
+        <div class="card-header">
+          <span class="card-title" id="form-estudiante-title">Nuevo estudiante</span>
+          <button class="btn btn-outline btn-sm" id="btn-cancelar-estudiante">Cancelar</button>
+        </div>
+        <div class="card-body">
+          <div id="msg-estudiante" class="msg"></div>
+
+          <!-- SECCIÓN: Datos básicos -->
+          <p class="est-seccion-titulo">Datos básicos</p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label class="form-label">Nombres y Apellidos *</label>
+              <input type="text" class="form-input" id="est-nombres" placeholder="Nombres completos"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de Documento *</label>
+              <select class="form-select" id="est-tipo-doc">
+                <option value="">Seleccionar...</option>
+                <option value="TI">TI — Tarjeta de Identidad</option>
+                <option value="CC">CC — Cédula de Ciudadanía</option>
+                <option value="RC">RC — Registro Civil</option>
+                <option value="CE">CE — Cédula de Extranjería</option>
+                <option value="PEP">PEP — Permiso Especial de Permanencia</option>
+                <option value="Sin documento">Sin documento</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Número de Documento *</label>
+              <input type="text" class="form-input" id="est-id-doc" placeholder="Número de documento"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Género</label>
+              <select class="form-select" id="est-genero">
+                <option value="">Seleccionar...</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fecha de Nacimiento</label>
+              <input type="date" class="form-input" id="est-fecha-nac"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">RH</label>
+              <select class="form-select" id="est-rh">
+                <option value="">Seleccionar...</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option>
+                <option>AB+</option><option>AB-</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sede *</label>
+              <select class="form-select" id="est-sede">
+                <option value="">Seleccionar sede...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Grado *</label>
+              <select class="form-select" id="est-grado">
+                <option value="">Seleccionar grado...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dirección</label>
+              <input type="text" class="form-input" id="est-direccion" placeholder="Dirección de residencia"/>
+            </div>
+          </div>
+
+          <!-- SECCIÓN: Información socioeconómica -->
+          <p class="est-seccion-titulo" style="margin-top:8px;">Información socioeconómica</p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label class="form-label">Discapacidad</label>
+              <select class="form-select" id="est-discapacidad">
+                <option value="Ninguna">Ninguna</option>
+                <option value="Visual">Visual</option>
+                <option value="Auditiva">Auditiva</option>
+                <option value="Motriz">Motriz</option>
+                <option value="Cognitiva">Cognitiva</option>
+                <option value="Múltiple">Múltiple</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Situación de Vulnerabilidad</label>
+              <select class="form-select" id="est-vulnerabilidad">
+                <option value="Ninguna">Ninguna</option>
+                <option value="Desplazado">Desplazado</option>
+                <option value="Reinsertado">Reinsertado</option>
+                <option value="Víctima del conflicto">Víctima del conflicto</option>
+                <option value="Migrante">Migrante</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría Sisben</label>
+              <select class="form-select" id="est-sisben">
+                <option value="No aplica">No aplica</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estrato</label>
+              <select class="form-select" id="est-estrato">
+                <option value="">Seleccionar...</option>
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="4">4</option>
+                <option value="5">5</option><option value="6">6</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="est-estado">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+                <option value="Retirado">Retirado</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SECCIÓN: Datos del acudiente -->
+          <p class="est-seccion-titulo" style="margin-top:8px;">Datos del acudiente</p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label class="form-label">Nombre de la Madre</label>
+              <input type="text" class="form-input" id="est-nombre-madre" placeholder="Nombre completo"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Documento de la Madre</label>
+              <input type="text" class="form-input" id="est-doc-madre" placeholder="Número de documento"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Teléfono de la Madre</label>
+              <input type="text" class="form-input" id="est-tel-madre" placeholder="Número de teléfono"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nombre del Padre</label>
+              <input type="text" class="form-input" id="est-nombre-padre" placeholder="Nombre completo"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Documento del Padre</label>
+              <input type="text" class="form-input" id="est-doc-padre" placeholder="Número de documento"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Teléfono del Padre</label>
+              <input type="text" class="form-input" id="est-tel-padre" placeholder="Número de teléfono"/>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+            <button class="btn btn-primary" id="btn-guardar-estudiante">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Guardar estudiante
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: PERIODOS
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-periodos">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Gestión de Periodos Académicos
+      </span>
+      <button class="btn btn-primary btn-sm" id="btn-guardar-periodos">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        </svg>
+        Guardar Cambios
+      </button>
+    </div>
+
+    <div class="card-body">
+      <div id="msg-periodos" class="msg"></div>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+        Gestiona las fechas de cada periodo académico. El sistema de calificaciones solo permite edición entre 
+        <strong>Fecha de Inicio</strong> y <strong>Cierre del Sistema</strong>.
+      </p>
+
+      <!-- Calendario visual resumen -->
+      <div class="periodo-calendar" id="periodo-calendar" style="margin-bottom:25px;">
+        <!-- Se genera con JavaScript -->
+      </div>
+
+      <!-- Tabla mejorada -->
+      <div id="tabla-periodos-wrap">
+        <div class="module-loading"><div class="ring-loader"></div><p>Cargando periodos...</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: SEDES Y GRADOS
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-sedes">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Sedes registradas</span>
+          </div>
+          <div id="lista-sedes">
+            <div class="module-loading"><div class="ring-loader"></div><p>Cargando...</p></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Grados activos</span>
+          </div>
+          <div id="lista-grados">
+            <div class="module-loading"><div class="ring-loader"></div><p>Cargando...</p></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: CONSOLIDADO
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-consolidado">
+      <div class="card">
+        <div class="card-header" style="justify-content: flex-start;">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+              Consolidado académico
+            </span>
+            <input type="text" class="form-input" id="busqueda-consol" placeholder="Buscar por nombre..." style="width:180px;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:4px;background:white;">
+            <select class="form-select" id="filtro-sede-consol" style="width:130px;padding:7px 10px;font-size:13px;">
+              <option value="">Todas las sedes</option>
+            </select>
+            <select class="form-select" id="filtro-grado-consol" style="width:140px;padding:7px 10px;font-size:13px;">
+              <option value="">— Elige un grado —</option>
+            </select>
+          </div>
+        </div>
+        <div id="tabla-consolidado-wrap">
+          <div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <p>Elige un grado para ver su consolidado</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PÁGINA: AVISOS
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-avisos">
+
+      <!-- Crear aviso -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Crear nuevo aviso
+          </span>
+        </div>
+        <div class="card-body">
+          <div id="msg-aviso" class="msg"></div>
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Título del aviso</label>
+              <input type="text" class="form-input" id="av-titulo" placeholder="Ej: Entrega de notas periodo 2"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dirigido a</label>
+              <select class="form-select" id="av-destinatario">
+                <option value="Todos">Todos</option>
+                <option value="Docente">Docentes</option>
+                <option value="Estudiante">Estudiantes</option>
+                <option value="Acudiente">Acudientes</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mensaje</label>
+            <textarea class="form-textarea" id="av-mensaje" placeholder="Escribe aquí el contenido del aviso..."></textarea>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-primary" id="btn-publicar-aviso">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Publicar aviso
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de avisos -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Avisos publicados
+          </span>
+          <select class="form-select" id="filtro-estado-aviso" style="width:auto; padding:6px 12px; font-size:13px;">
+            <option value="todos">Todos</option>
+            <option value="activos">Solo activos</option>
+            <option value="inactivos">Solo inactivos</option>
+          </select>
+        </div>
+        <div class="card-body" id="lista-avisos">
+          <div class="module-loading"><div class="ring-loader"></div><p>Cargando avisos...</p></div>
+        </div>
+      </div>
+    </div>
+
+        <!-- ══════════════════════════════════════
+         PÁGINA: BOLETINES (Nuevo Módulo)
+    ══════════════════════════════════════ -->
+    <div class="page-content" id="page-boletines">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Generación de Boletines Académicos
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div id="msg-boletines" class="msg"></div>
+
+          <!-- Filtros -->
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:16px; margin-bottom:24px; align-items:end;">
+            <div>
+              <label class="form-label">Sede</label>
+              <select class="form-select" id="filtro-sede-boletin">
+                <option value="">Todas las sedes</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Grado</label>
+              <select class="form-select" id="filtro-grado-boletin">
+                <option value="">Primero selecciona sede</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Periodo</label>
+              <select class="form-select" id="filtro-periodo-boletin">
+                <option value="">Selecciona periodo</option>
+                <option value="1">Periodo 1</option>
+                <option value="2">Periodo 2</option>
+                <option value="3">Periodo 3</option>
+                <option value="4">Periodo 4</option>
+                <option value="final">Boletín Final Anual</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="btn-cargar-boletines" style="padding:10px 20px;">
+                Cargar Estudiantes
+              </button>
+            </div>
+          </div>
+
+          <!-- Barra de acciones PDF -->
+          <div id="barra-pdf" style="display:none; margin-bottom:16px; padding:14px 18px;
+               background:#e8f5e9; border-radius:10px; border:1px solid #a5d6a7;
+               display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span style="font-size:13px; font-weight:600; color:#1b5e20; flex:1;">
+              📄 <span id="txt-cantidad-pdf">0</span> boletín(es) listo(s) para exportar
+            </span>
+            <button class="btn btn-primary" id="btn-imprimir-todos" onclick="imprimirBoletines('todos')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Imprimir / PDF todos
+            </button>
+          </div>
+
+          <!-- Vista previa del boletín -->
+          <div id="vista-previa-boletin" style="display:none; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+              <h3 style="margin:0;">Vista Previa del Boletín</h3>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary" id="btn-cerrar-preview" onclick="document.getElementById('vista-previa-boletin').style.display='none'">
+                  Cerrar vista previa
+                </button>
+                <button class="btn btn-primary" id="btn-imprimir-uno" onclick="imprimirBoletines('uno')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                    <rect x="6" y="14" width="12" height="8"/>
+                  </svg>
+                  Imprimir este boletín
+                </button>
+              </div>
+            </div>
+            <div id="iframe-boletin" style="border:1px solid #ddd; border-radius:12px; overflow:hidden; background:white; min-height:600px;"></div>
+          </div>
+
+          <!-- Lista de estudiantes -->
+          <div id="lista-estudiantes-boletin" style="display:none;">
+            <div class="card-header" style="margin-bottom:16px;">
+              <span class="card-title">Estudiantes cargados</span>
+            </div>
+            <div id="tabla-estudiantes-boletin-wrap"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /main-area -->
+  
+</div><!-- /app-shell -->
+
+
+
+<script src="script_admin.js"></script>
+</body>
+</html>

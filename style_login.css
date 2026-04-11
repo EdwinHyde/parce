@@ -1,0 +1,340 @@
+/* ── CONFIGURACIÓN BASE & RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --green-dark:  #1b5e20;
+  --green-mid:   #2e7d32;
+  --green-main:  #388e3c;
+  --green-light: #a5d6a7;
+  --green-pale:  #e8f5e9;
+  --white:       #ffffff;
+  --off-white:   #f0f4f0;
+  --text-dark:   #1a2e1a;
+  --text-mid:    #3d5c3d;
+  --text-muted:  #6a8f6a;
+  --radius:      20px;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-dark);
+}
+
+body {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  background: linear-gradient(160deg, var(--green-dark) 0%, var(--green-mid) 50%, var(--green-main) 100%);
+}
+
+/* ════════════════════════════════
+   MÓVIL — fondo verde, forma flotante
+   ════════════════════════════════ */
+
+/* Círculos decorativos de fondo */
+body::before {
+  content: '';
+  position: fixed;
+  width: 320px; height: 320px;
+  background: rgba(255,255,255,.06);
+  border-radius: 50%;
+  top: -80px; right: -80px;
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  width: 220px; height: 220px;
+  background: rgba(255,255,255,.04);
+  border-radius: 50%;
+  bottom: 60px; left: -60px;
+  pointer-events: none;
+}
+
+/* ── PANEL IZQUIERDO (solo escritorio) ── */
+.panel-left {
+  display: none;
+  flex: 1.2;
+  background: linear-gradient(160deg, var(--green-dark) 0%, var(--green-mid) 55%, var(--green-main) 100%);
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.panel-left-inner {
+  position: relative; z-index: 1;
+  text-align: center; color: white;
+  max-width: 400px;
+}
+
+.panel-left-inner img {
+  width: 100%; max-width: 200px; height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,.30));
+  margin-bottom: 25px;
+}
+
+.panel-left-inner h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 40px; line-height: 1.2; margin-bottom: 12px;
+}
+
+.motto-badges {
+  display: flex; gap: 12px;
+  justify-content: center; margin-top: 30px;
+}
+
+.motto-badge {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 30px; padding: 6px 18px;
+  font-size: 11px; letter-spacing: 1.5px; font-weight: 600;
+}
+
+/* ── PANEL DERECHO ── */
+.panel-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── ENCABEZADO MÓVIL — sobre el formulario ── */
+.mobile-header {
+  text-align: center;
+  margin-bottom: 28px;
+  color: #fff;
+}
+
+.mobile-header img {
+  width: 90px; height: auto;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.25));
+}
+
+.mobile-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: #fff;
+  line-height: 1.25; margin-bottom: 6px;
+}
+
+.mobile-header p {
+  font-size: 13px;
+  color: rgba(255,255,255,.75);
+  font-weight: 500;
+}
+
+/* Badges SABER · HACER · SER en móvil */
+.mobile-badges {
+  display: flex; gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.mobile-badge {
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 99px;
+  padding: 4px 14px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; color: #fff;
+}
+
+/* ── TARJETA DEL FORMULARIO ── */
+.form-wrap {
+  width: 100%; max-width: 400px;
+  background: #fff;
+  padding: 32px 26px 28px;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+}
+
+.form-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; margin-bottom: 6px;
+  color: var(--text-dark);
+}
+
+.form-subtitle {
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+/* ── INPUTS ── */
+.form-group { margin-bottom: 18px; }
+
+.form-group label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: .6px; margin-bottom: 7px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex; align-items: center;
+}
+
+.input-icon {
+  position: absolute; left: 14px;
+  color: var(--green-main);
+  display: flex; align-items: center;
+  pointer-events: none;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 15px 16px 15px 46px;
+  border: 2px solid #e0eee0;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  background: #f9fbf9;
+  transition: all .25s ease;
+  outline: none; color: var(--text-dark);
+}
+
+.form-group input:focus {
+  border-color: var(--green-main);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(56,142,60,.1);
+}
+
+.eye-toggle {
+  position: absolute; right: 12px;
+  background: none; border: none;
+  cursor: pointer; color: var(--text-muted);
+  display: flex; padding: 8px;
+}
+
+/* ── BOTÓN INGRESAR ── */
+.btn-login {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white; border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 8px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(27,94,32,.35);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.btn-login:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(27,94,32,.25);
+}
+
+.btn-login.loading { cursor: not-allowed; }
+
+.btn-inner {
+  display: flex; align-items: center;
+  justify-content: center; gap: 10px;
+  transition: opacity .2s;
+}
+
+.btn-login.loading .btn-inner { opacity: 0; visibility: hidden; }
+
+/* ── SPINNER ── */
+.spinner {
+  display: none;
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px; height: 22px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+
+.btn-login.loading .spinner { display: block; }
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ── ERROR ── */
+.error-msg {
+  display: none;
+  background: #fff5f5;
+  border: 1.5px solid #feb2b2;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13px; color: #c53030;
+  margin-bottom: 18px;
+  align-items: center; gap: 8px;
+}
+.error-msg.visible { display: flex; }
+
+/* ── FORGOT ── */
+.forgot-link { text-align: center; margin-top: 18px; }
+.forgot-link a {
+  font-size: 13px; color: var(--text-muted);
+  text-decoration: none; font-weight: 600;
+}
+.forgot-link a:hover { color: var(--green-main); text-decoration: underline; }
+
+/* ── FOOTER ── */
+.form-footer {
+  margin-top: 28px;
+  font-size: 12px; color: #b0c4b0;
+  text-align: center; line-height: 1.6;
+}
+
+/* ════════════════════════════════
+   ESCRITORIO — layout de dos paneles
+   ════════════════════════════════ */
+@media (min-width: 900px) {
+  body {
+    flex-direction: row;
+    background: var(--off-white);
+  }
+  body::before, body::after { display: none; }
+
+  .panel-left { display: flex; }
+  .panel-right {
+    flex: 0 0 500px;
+    background: white;
+    padding: 48px;
+  }
+  .mobile-header { display: none; }
+  .form-wrap {
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .panel-right::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 15%; bottom: 15%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #e0eee0, transparent);
+  }
+}
+
+/* ── Marca ── */
+.brand-text { display: flex; flex-direction: column; gap: 1px; line-height: 1; }
+.brand-sigla {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 600; letter-spacing: 2px;
+}
+.brand-desc {
+  font-size: 9.5px; font-weight: 500;
+  letter-spacing: .3px; text-transform: uppercase;
+  opacity: .85; max-width: 280px; line-height: 1.3;
+}
+@media (max-width: 480px) { .brand-desc { display: none; } }
