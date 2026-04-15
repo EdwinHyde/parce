@@ -74,7 +74,7 @@ function mostrarEstado(id) {
   }
 }
 
-const METADATOS = ['no_identificador','nombres_apellidos','grado','sede','estado','comportamiento'];
+const METADATOS = ['no_identificador','nombres_apellidos','nombres y apellidos','nombres y apeliidos','grado','sede','estado','comportamiento','id_estudiante','contrasena','no documento','no_documento','documento','edad','fecha_nacimiento','fecha nacimiento','acudiente','telefono','direccion','correo','eps','genero','sexo','rh','tipo_documento','tipo documento','jornada','foto_url'];
 const ORDEN_GRADOS = [
   'Preescolar','Primero','Segundo','Tercero','Cuarto','Quinto',
   'Sexto','Séptimo','Octavo','Noveno','Décimo','Undécimo'
@@ -106,7 +106,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 
 document.getElementById('btn-logout').addEventListener('click', () => {
   if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-    window.location.href = 'Index.html';
+    window.location.href = 'index.html';
   }
 });
 
@@ -335,18 +335,35 @@ async function cargarFallasPrevias() {
     const iId   = headers.findIndex(h => h.toUpperCase() === 'ID_ESTUDIANTE');
     const iAsig = headers.findIndex(h => h.toUpperCase() === 'ASIGNATURA');
     const iF    = headers.findIndex(h => h.toUpperCase() === 'FALLAS');
+    const iNom  = headers.findIndex(h =>
+      h.toUpperCase() === 'NOMBRE' ||
+      h.toUpperCase() === 'NOMBRES Y APELLIDOS' ||
+      h.toUpperCase() === 'NOMBRES_APELLIDOS'
+    );
 
     const resultado = {};
     rows.forEach(row => {
-      if (String(row[iP]||'').trim() !== String(periodoActivo).trim()) return;
+      // Comparar periodo normalizado (como string, removiendo .0 final)
+      const perRow = String(row[iP]||'').trim().replace(/\.0$/, '');
+      const perAct = String(periodoActivo).trim().replace(/\.0$/, '');
+      if (perRow !== perAct) return;
       if (gradoActivo !== '__todos__' &&
           (row[iG]||'').trim().toLowerCase() !== gradoActivo.toLowerCase()) return;
-      const id   = String(row[iId]  ||'').trim();
+      const id   = iId >= 0 ? String(row[iId]||'').trim() : '';
+      const nombre = iNom >= 0 ? String(row[iNom]||'').trim() : '';
       const asig = String(row[iAsig]||'').trim();
-      const f    = String(row[iF]   ||'').trim();
-      if (id && asig && f !== '') {
-        if (!resultado[id]) resultado[id] = {};
-        resultado[id][asig] = f;
+      const f    = String(row[iF]||'').trim();
+      if (asig && f !== '') {
+        // Guardar por ID (si existe)
+        if (id) {
+          if (!resultado[id]) resultado[id] = {};
+          resultado[id][asig] = f;
+        }
+        // También guardar por nombre como fallback
+        if (nombre) {
+          if (!resultado[nombre]) resultado[nombre] = {};
+          resultado[nombre][asig] = f;
+        }
       }
     });
     return resultado;
@@ -366,6 +383,7 @@ function renderTabla() {
     h.trim().toLowerCase() === 'nombres y apeliidos'
   );
   const iId  = headersEstudiantes.findIndex(h =>
+    h.toUpperCase() === 'ID_ESTUDIANTE' ||
     h.toUpperCase() === 'NO DOCUMENTO' ||
     h.toUpperCase() === 'NO_DOCUMENTO' ||
     h.toUpperCase() === 'DOCUMENTO'
@@ -403,7 +421,10 @@ function renderTabla() {
     const nombre  = (iNombre >= 0 ? row[iNombre] : '') || 'Sin nombre';
     const sede    = (row[iSede]  || '—').trim();
     const idEstud = (row[iId]    || '').trim();
-    const prev    = fallasPrevias[idEstud] || {};
+    const nombreTrim = nombre.trim();
+    // Buscar fallas previas: primero por ID, luego por nombre completo
+    const prev    = (idEstud && fallasPrevias[idEstud]) ? fallasPrevias[idEstud]
+                  : (fallasPrevias[nombreTrim] || {});
     const tienePrev = Object.keys(prev).length > 0;
 
     const tr = document.createElement('tr');
@@ -422,7 +443,14 @@ function renderTabla() {
     const filaInputs = [];
 
     asignaturasDocente.forEach((asig, colIdx) => {
-      const valorPrev = prev[asig.nombre] || '';
+      // Buscar valor previo con tolerancia: exacto, luego case-insensitive
+      let valorPrev = prev[asig.nombre] || '';
+      if (!valorPrev) {
+        // Buscar por nombre normalizado (case-insensitive, sin espacios extra)
+        const asigNorm = asig.nombre.trim().toLowerCase();
+        const keyMatch = Object.keys(prev).find(k => k.trim().toLowerCase() === asigNorm);
+        if (keyMatch) valorPrev = prev[keyMatch];
+      }
       const td    = document.createElement('td');
       td.className = 'td-falla';
 

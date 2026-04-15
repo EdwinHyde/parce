@@ -160,13 +160,22 @@
     ══════════════════════════════════════ -->
     <div class="page-content active" id="page-dashboard">
 
-      <!-- Banner periodo activo -->
+      <!-- Banner periodo activo + selector -->
       <div class="periodo-card" id="dash-periodo-card">
         <div class="periodo-card-text">
           <strong id="dash-periodo-titulo">Cargando...</strong>
           <span id="dash-periodo-sub">verificando fechas del sistema</span>
         </div>
         <div class="periodo-badges" id="dash-periodo-badges"></div>
+        <div class="dash-periodo-controles" id="dash-periodo-controles" style="display:none;">
+          <label style="font-size:12px;color:rgba(255,255,255,0.85);font-weight:600;margin-right:6px;">Ver periodo:</label>
+          <select id="dash-select-periodo" style="padding:5px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px);">
+          </select>
+          <button id="dash-btn-excel" style="display:none;margin-left:10px;padding:6px 14px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer;gap:5px;display:flex;align-items:center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Exportar Excel
+          </button>
+        </div>
       </div>
 
       <!-- Tarjetas de alerta -->
@@ -211,7 +220,7 @@
             <div class="card-header">
               <span class="card-title">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Semáforo académico por grado
+                Semáforo académico por grado — <span id="dash-label-periodo-semaforo">Periodo actual</span>
               </span>
             </div>
             <div class="card-body" id="dash-semaforo">
@@ -223,7 +232,7 @@
             <div class="card-header">
               <span class="card-title">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                Promedio por grado — Periodo actual
+                Promedio por grado — <span id="dash-label-periodo-barras">Periodo actual</span>
               </span>
             </div>
             <div class="card-body" id="dash-barras">
@@ -798,7 +807,7 @@
                 </button>
               </div>
             </div>
-            <div id="iframe-boletin" style="border:1px solid #ddd; border-radius:12px; overflow:hidden; background:white; min-height:600px;"></div>
+            <div id="iframe-boletin" style="border:none; border-radius:0; overflow:hidden; background:white; min-height:auto; padding:0;"></div>
           </div>
 
           <!-- Lista de estudiantes -->
@@ -820,6 +829,7 @@
 
 
 
+<script src="session_timeout.js"></script>
 <script src="script_admin.js"></script>
 </body>
 </html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Orientación Psicosocial — I.E. Antonio Nariño</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="https://i.postimg.cc/QxCM5Y1b/icono-logo-favico.png"/>
+  <link rel="stylesheet" href="style_orientador_psico.css">
+  <link rel="stylesheet" href="style_fotos_perfil.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="ori-sidebar" id="ori-sidebar">
+    <div class="ori-sidebar-brand">
+      <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" alt="Escudo"/>
+      <div>
+        <strong>P.A.R.C.E</strong>
+        <span>Orientación Psicosocial</span>
+      </div>
+    </div>
+
+    <div class="ori-sidebar-profile" id="btn-mi-perfil" title="Ver mi perfil">
+      <div class="ori-profile-avatar" id="sidebar-avatar">O</div>
+      <div class="ori-profile-info">
+        <strong id="sidebar-nombre">Orientador</strong>
+        <span>Orientador Escolar</span>
+      </div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" style="flex-shrink:0;margin-left:auto;">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    </div>
+
+    <nav class="ori-sidebar-nav">
+      <div class="ori-nav-label">Principal</div>
+      <button class="ori-nav-item ori-nav-active" data-page="dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard de Alertas
+        <span class="ori-nav-badge" id="badge-dashboard" style="display:none">0</span>
+      </button>
+
+      <div class="ori-nav-label">Gestión</div>
+      <button class="ori-nav-item" data-page="expediente">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Expediente Integral
+      </button>
+      <button class="ori-nav-item" data-page="monitor">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Monitor de Riesgos
+        <span class="ori-nav-badge ori-badge-orange" id="badge-monitor" style="display:none">0</span>
+      </button>
+      <button class="ori-nav-item" data-page="remisiones">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        Remisiones Externas
+        <span class="ori-nav-badge ori-badge-red" id="badge-remisiones" style="display:none">0</span>
+      </button>
+      <button class="ori-nav-item" data-page="agenda">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agenda de Citas
+      </button>
+
+      <div class="ori-nav-label">Información</div>
+      <button class="ori-nav-item" data-page="manual">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Manual de Uso
+      </button>
+    </nav>
+
+    <div class="ori-sidebar-footer">
+      <button class="ori-btn-logout" id="btn-logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <div class="ori-sidebar-overlay" id="ori-sidebar-overlay"></div>
+
+  <!-- ══ ÁREA PRINCIPAL ══ -->
+  <div class="ori-main-area">
+
+    <header class="ori-top-header">
+      <div class="ori-header-left">
+        <button class="ori-btn-menu-toggle" id="btn-menu-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 class="ori-page-title" id="page-title">Dashboard de Alertas</h1>
+      </div>
+      <div class="ori-header-right">
+        <div class="ori-header-sede" id="header-sede-tag">Sede Principal</div>
+        <button class="ori-header-profile-btn" id="btn-mi-perfil-header">
+          <div class="ori-header-avatar" id="header-avatar">O</div>
+          <div class="ori-header-profile-info">
+            <span id="header-nombre">Orientador</span>
+            <small>Orientador Escolar</small>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <div class="ori-page ori-page-active" id="page-dashboard">
+      <div class="ori-semaforo-row">
+        <div class="ori-sem-card ori-sem-rojo"><div class="ori-sem-luz"></div><div><div class="ori-sem-num" id="sem-rojo-num">0</div><div class="ori-sem-label">Crítico</div></div></div>
+        <div class="ori-sem-card ori-sem-naranja"><div class="ori-sem-luz"></div><div><div class="ori-sem-num" id="sem-naranja-num">0</div><div class="ori-sem-label">Medio</div></div></div>
+        <div class="ori-sem-card ori-sem-verde"><div class="ori-sem-luz"></div><div><div class="ori-sem-num" id="sem-verde-num">0</div><div class="ori-sem-label">Seguimiento</div></div></div>
+      </div>
+
+      <div class="ori-widgets-grid">
+        <div class="ori-widget"><div class="ori-widget-icon ori-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div><div><div class="ori-widget-num" id="widget-casos-abiertos">—</div><div class="ori-widget-label">Casos Abiertos</div></div></div>
+        <div class="ori-widget"><div class="ori-widget-icon ori-icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="ori-widget-num" id="widget-proximas-citas">—</div><div class="ori-widget-label">Próximas Citas</div></div></div>
+        <div class="ori-widget"><div class="ori-widget-icon ori-icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><div><div class="ori-widget-num" id="widget-remisiones-sin-resp">—</div><div class="ori-widget-label">Remisiones sin Respuesta</div></div></div>
+        <div class="ori-widget"><div class="ori-widget-icon ori-icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="ori-widget-num" id="widget-alertas-bienestar">—</div><div class="ori-widget-label">Alertas Docentes</div></div></div>
+      </div>
+
+      <div class="ori-card">
+        <div class="ori-card-header">
+          <span class="ori-card-title">Casos Activos</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <select class="ori-select-sm" id="filtro-casos-prioridad"><option value="">Todas las prioridades</option><option value="Rojo">🔴 Crítico</option><option value="Naranja">🟠 Medio</option><option value="Verde">🟢 Seguimiento</option></select>
+            <select class="ori-select-sm" id="filtro-casos-estado"><option value="">Todos los estados</option><option value="Recibido">Recibido</option><option value="En Valoración">En Valoración</option><option value="Seguimiento Interno">Seguimiento Interno</option><option value="Remitido Externo">Remitido Externo</option></select>
+            <button class="ori-btn-primary" id="btn-nuevo-caso"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo Caso</button>
+          </div>
+        </div>
+        <div id="casos-loading" class="ori-loading" style="display:none;"><div class="ori-spinner"></div><span>Cargando...</span></div>
+        <div id="casos-lista"></div>
+        <div id="casos-vacio" class="ori-empty" style="display:none;"><p>No hay casos activos con estos filtros</p></div>
+      </div>
+    </div>
+
+    <!-- EXPEDIENTE -->
+    <div class="ori-page" id="page-expediente">
+      <div class="ori-card">
+        <div class="ori-card-header"><span class="ori-card-title">Buscar Estudiante</span></div>
+        <div style="padding:16px 20px;position:relative;">
+          <input type="text" class="ori-input" id="exp-buscar-input" placeholder="Escribe el nombre o número de documento…" autocomplete="off">
+          <div id="exp-sugerencias" class="ori-dropdown" style="display:none;"></div>
+        </div>
+      </div>
+      <div id="exp-ficha-container" style="display:none;">
+        <div class="ori-card">
+          <div class="ori-card-header">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="ori-exp-avatar" id="exp-avatar">?</div>
+              <div><h2 id="exp-nombre" style="margin:0;font-size:18px;color:var(--ori-text);"></h2><p id="exp-info-sub" style="margin:4px 0 0;font-size:13px;color:var(--ori-text-muted);"></p></div>
+            </div>
+            <span class="ori-badge ori-badge-blue">Solo Lectura</span>
+          </div>
+          <div class="ori-info-grid" id="exp-info-grid"></div>
+        </div>
+        <div class="ori-card">
+          <div class="ori-card-header">
+            <span class="ori-card-title">Timeline de Intervenciones</span>
+            <button class="ori-btn-primary ori-btn-sm" id="btn-nueva-intervencion"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nueva Intervención</button>
+          </div>
+          <div id="exp-timeline" class="ori-timeline" style="padding:16px 20px;"></div>
+        </div>
+        <div class="ori-card ori-card-confidential">
+          <div class="ori-card-header">
+            <div style="display:flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ori-accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="ori-card-title">Notas Privadas Confidenciales</span></div>
+            <div style="display:flex;gap:8px;align-items:center;"><span class="ori-badge ori-badge-red">AES-256</span><button class="ori-btn-ghost ori-btn-sm" id="btn-toggle-notas">🔒 Desbloquear</button></div>
+          </div>
+          <div id="notas-bloqueadas" class="ori-notas-locked"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>Notas protegidas con cifrado end-to-end</p><small>Solo el orientador autorizado puede acceder</small></div>
+          <div id="notas-desbloqueadas" style="display:none;padding:16px 20px;">
+            <textarea id="notas-privadas-texto" rows="5" class="ori-textarea" placeholder="Notas privadas y confidenciales… (se cifrarán con AES-256 antes de guardar)"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><small style="color:#aaa;">🔐 Se cifra localmente. Nunca se almacena texto plano.</small><button class="ori-btn-primary ori-btn-sm" id="btn-guardar-notas">Guardar cifrado</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MONITOR -->
+    <div class="ori-page" id="page-monitor">
+      <div class="ori-alert-banner"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Criterio activo: Promedio académico inferior a 3.0 — Presiona "Recalcular" para analizar</span></div>
+      <div class="ori-filtros-row">
+        <select class="ori-select-sm" id="monitor-grado"><option value="">Todos los grados</option></select>
+        <input type="text" class="ori-input-sm" id="monitor-buscar" placeholder="Buscar estudiante…">
+        <button class="ori-btn-primary" id="btn-recargar-monitor"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Recalcular</button>
+      </div>
+      <div class="ori-card">
+        <div id="monitor-loading" class="ori-loading" style="display:none;"><div class="ori-spinner"></div><span>Analizando datos académicos…</span></div>
+        <div style="overflow-x:auto;">
+          <table class="ori-table">
+            <thead><tr><th>Estudiante</th><th>Grado</th><th>Promedio</th><th>Criterio</th><th>Acción</th></tr></thead>
+            <tbody id="monitor-tbody"><tr><td colspan="5" class="ori-tabla-vacia">Presiona "Recalcular" para analizar datos</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REMISIONES -->
+    <div class="ori-page" id="page-remisiones">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="ori-btn-primary" id="btn-nueva-remision"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nueva Remisión</button>
+      </div>
+      <div class="ori-filtros-row">
+        <button class="ori-pill ori-pill-active" data-filter-rem="todos">Todas</button>
+        <button class="ori-pill" data-filter-rem="Sin Respuesta">Sin Respuesta</button>
+        <button class="ori-pill" data-filter-rem="En Proceso">En Proceso</button>
+        <button class="ori-pill" data-filter-rem="Con Respuesta">Con Respuesta</button>
+        <button class="ori-pill" data-filter-rem="Cerrada">Cerradas</button>
+      </div>
+      <div class="ori-card">
+        <div id="remisiones-loading" class="ori-loading" style="display:none;"><div class="ori-spinner"></div><span>Cargando…</span></div>
+        <div id="remisiones-lista"></div>
+        <div id="remisiones-vacio" class="ori-empty" style="display:none;"><p>No hay remisiones con este filtro</p></div>
+      </div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="ori-page" id="page-agenda">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="ori-btn-primary" id="btn-nueva-cita"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nueva Cita</button>
+      </div>
+      <div class="ori-card">
+        <div class="ori-card-header"><span class="ori-card-title">Esta Semana</span><div style="display:flex;gap:6px;"><button class="ori-btn-ghost ori-btn-sm" id="btn-semana-prev">← Anterior</button><button class="ori-btn-ghost ori-btn-sm" id="btn-semana-hoy">Hoy</button><button class="ori-btn-ghost ori-btn-sm" id="btn-semana-next">Siguiente →</button></div></div>
+        <div id="agenda-semana-header" class="ori-semana-dias"></div>
+        <div id="agenda-citas-semana" style="padding-bottom:8px;"></div>
+      </div>
+      <div class="ori-card">
+        <div class="ori-card-header"><span class="ori-card-title">Todas las Citas</span><select class="ori-select-sm" id="agenda-filtro-estado"><option value="">Todos los estados</option><option value="Programada">Programadas</option><option value="Realizada">Realizadas</option><option value="Cancelada">Canceladas</option><option value="No Asistió">No Asistió</option></select></div>
+        <div id="citas-loading" class="ori-loading" style="display:none;"><div class="ori-spinner"></div><span>Cargando…</span></div>
+        <div id="citas-lista"></div>
+        <div id="citas-vacio" class="ori-empty" style="display:none;"><p>No hay citas programadas</p></div>
+      </div>
+    </div>
+
+    <!-- MANUAL -->
+    <div class="ori-page" id="page-manual">
+      <div class="ori-card"><div id="manual-body" style="padding:28px 32px;line-height:1.8;"><div class="ori-loading"><div class="ori-spinner"></div><span>Cargando manual…</span></div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODALES ══ -->
+
+<!-- Nuevo Caso -->
+<div class="ori-modal-backdrop" id="modal-nuevo-caso" style="display:none;">
+  <div class="ori-modal">
+    <div class="ori-modal-header"><h3>Abrir Nuevo Caso</h3><button class="ori-modal-close" data-close="modal-nuevo-caso">✕</button></div>
+    <div class="ori-modal-body">
+      <div class="ori-form-group"><label>Estudiante *</label><input type="text" class="ori-input" id="caso-buscar-est" placeholder="Buscar por nombre o documento…" autocomplete="off"><div id="caso-sugerencias" class="ori-dropdown" style="display:none;"></div></div>
+      <div id="caso-est-chip" style="display:none;" class="ori-chip"><span id="caso-est-nombre-chip"></span><button id="caso-est-quitar" class="ori-chip-remove">✕</button></div>
+      <div class="ori-form-group"><label>Prioridad *</label><select class="ori-input" id="caso-prioridad"><option value="Verde">🟢 Verde — Seguimiento</option><option value="Naranja">🟠 Naranja — Medio</option><option value="Rojo">🔴 Rojo — Crítico</option></select></div>
+      <div class="ori-form-group"><label>Motivo de Apertura *</label><textarea class="ori-textarea" id="caso-motivo" rows="3" placeholder="Describe brevemente el motivo…"></textarea></div>
+    </div>
+    <div class="ori-modal-footer"><button class="ori-btn-ghost" data-close="modal-nuevo-caso">Cancelar</button><button class="ori-btn-primary" id="btn-guardar-caso">Abrir Caso</button></div>
+  </div>
+</div>
+
+<!-- Nueva Intervención -->
+<div class="ori-modal-backdrop" id="modal-nueva-intervencion" style="display:none;">
+  <div class="ori-modal">
+    <div class="ori-modal-header"><h3>Registrar Intervención</h3><button class="ori-modal-close" data-close="modal-nueva-intervencion">✕</button></div>
+    <div class="ori-modal-body">
+      <input type="hidden" id="interv-caso-id">
+      <div class="ori-form-group"><label>Tipo de Intervención *</label><select class="ori-input" id="interv-tipo"><option value="Entrevista Individual">Entrevista Individual</option><option value="Entrevista con Acudiente">Entrevista con Acudiente</option><option value="Observación en Aula">Observación en Aula</option><option value="Compromiso">Compromiso</option><option value="Citación">Citación</option><option value="Seguimiento Telefónico">Seguimiento Telefónico</option><option value="Anotación Orientadora">Anotación Orientadora</option><option value="Remisión Interna">Remisión Interna</option></select></div>
+      <div class="ori-form-group"><label>Cambiar estado del caso</label><select class="ori-input" id="interv-nuevo-estado"><option value="">— Sin cambio —</option><option value="Recibido">Recibido</option><option value="En Valoración">En Valoración</option><option value="Seguimiento Interno">Seguimiento Interno</option><option value="Remitido Externo">Remitido Externo</option><option value="Cerrado">Cerrado</option></select></div>
+      <div class="ori-form-group"><label>Descripción *</label><textarea class="ori-textarea" id="interv-descripcion" rows="4" maxlength="1000" placeholder="Describe la intervención, acuerdos y compromisos…"></textarea><div style="text-align:right;font-size:11px;color:#aaa;margin-top:2px;"><span id="interv-char-count">0</span>/1000</div></div>
+      <div class="ori-form-group"><label>Adjuntar Archivo (PDF o Imagen)</label><input type="file" id="interv-adjunto" accept=".pdf,image/*" class="ori-file-input"><div id="interv-adjunto-preview" style="display:none;" class="ori-adjunto-preview"></div></div>
+    </div>
+    <div class="ori-modal-footer"><button class="ori-btn-ghost" data-close="modal-nueva-intervencion">Cancelar</button><button class="ori-btn-primary" id="btn-guardar-intervencion">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Nueva Remisión -->
+<div class="ori-modal-backdrop" id="modal-nueva-remision" style="display:none;">
+  <div class="ori-modal ori-modal-lg">
+    <div class="ori-modal-header"><h3>Nueva Remisión Externa</h3><button class="ori-modal-close" data-close="modal-nueva-remision">✕</button></div>
+    <div class="ori-modal-body">
+      <div class="ori-form-grid-2">
+        <div class="ori-form-group"><label>Caso / Estudiante *</label><select class="ori-input" id="rem-caso-select"><option value="">Seleccionar caso…</option></select></div>
+        <div class="ori-form-group"><label>Entidad de Destino *</label><select class="ori-input" id="rem-entidad"><option value="EPS / IPS">EPS / IPS</option><option value="ICBF">ICBF</option><option value="Comisaría de Familia">Comisaría de Familia</option><option value="Policía de Infancia">Policía de Infancia</option><option value="Fiscalía">Fiscalía</option><option value="Bienestar Social Municipal">Bienestar Social Municipal</option><option value="Hospital / Urgencias">Hospital / Urgencias</option><option value="Otro">Otro</option></select></div>
+      </div>
+      <div class="ori-form-group" id="rem-entidad-otro-group" style="display:none;"><label>Especificar Entidad</label><input type="text" class="ori-input" id="rem-entidad-otro" placeholder="Nombre de la entidad…"></div>
+      <div class="ori-form-group"><label>Fundamento Legal *</label><input type="text" class="ori-input" id="rem-motivo-legal" placeholder="Ej: Art. 44 Constitución, Ley 1098/2006 Art. 11…"></div>
+      <div class="ori-form-group"><label>Descripción de los Hechos *</label><textarea class="ori-textarea" id="rem-descripcion-hechos" rows="4" placeholder="Descripción objetiva y cronológica de los hechos…"></textarea></div>
+      <div class="ori-form-group"><label>Acciones Previas del Colegio *</label><textarea class="ori-textarea" id="rem-acciones-previas" rows="3" placeholder="Intervenciones, citaciones y compromisos realizados…"></textarea></div>
+      <div class="ori-form-group"><label>Firma Digital del Orientador</label><div class="ori-firma-container"><canvas id="firma-canvas" width="400" height="120"></canvas><div class="ori-firma-actions"><button class="ori-btn-ghost ori-btn-sm" id="btn-limpiar-firma">Limpiar firma</button><small style="color:#aaa;">Dibuja tu firma con el mouse o el dedo</small></div></div></div>
+    </div>
+    <div class="ori-modal-footer"><button class="ori-btn-ghost" data-close="modal-nueva-remision">Cancelar</button><button class="ori-btn-ghost" id="btn-exportar-pdf-remision"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button><button class="ori-btn-primary" id="btn-guardar-remision">Guardar Remisión</button></div>
+  </div>
+</div>
+
+<!-- Nueva Cita -->
+<div class="ori-modal-backdrop" id="modal-nueva-cita" style="display:none;">
+  <div class="ori-modal">
+    <div class="ori-modal-header"><h3>Programar Cita</h3><button class="ori-modal-close" data-close="modal-nueva-cita">✕</button></div>
+    <div class="ori-modal-body">
+      <div class="ori-form-group"><label>Estudiante *</label><input type="text" class="ori-input" id="cita-buscar-est" placeholder="Buscar estudiante…" autocomplete="off"><div id="cita-sugerencias" class="ori-dropdown" style="display:none;"></div></div>
+      <div id="cita-est-chip" style="display:none;" class="ori-chip"><span id="cita-est-nombre-chip"></span><button id="cita-est-quitar" class="ori-chip-remove">✕</button></div>
+      <div class="ori-form-grid-2">
+        <div class="ori-form-group"><label>Tipo de Cita *</label><select class="ori-input" id="cita-tipo"><option value="Individual">Individual</option><option value="Con Acudiente">Con Acudiente</option><option value="Grupal">Grupal</option><option value="Seguimiento">Seguimiento</option><option value="Cierre">Cierre de Caso</option></select></div>
+        <div class="ori-form-group"><label>Duración</label><select class="ori-input" id="cita-duracion"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hora</option><option value="90">1.5 horas</option></select></div>
+      </div>
+      <div class="ori-form-group"><label>Fecha y Hora *</label><input type="datetime-local" class="ori-input" id="cita-fecha-hora"></div>
+      <div class="ori-form-group"><label>Lugar</label><input type="text" class="ori-input" id="cita-lugar" value="Oficina de Orientación"></div>
+      <div class="ori-form-group"><label>Descripción / Motivo</label><textarea class="ori-textarea" id="cita-descripcion" rows="2" placeholder="Motivo de la cita…"></textarea></div>
+    </div>
+    <div class="ori-modal-footer"><button class="ori-btn-ghost" data-close="modal-nueva-cita">Cancelar</button><button class="ori-btn-primary" id="btn-guardar-cita">Programar Cita</button></div>
+  </div>
+</div>
+
+<!-- Detalle Caso -->
+<div class="ori-modal-backdrop" id="modal-detalle-caso" style="display:none;">
+  <div class="ori-modal ori-modal-lg">
+    <div class="ori-modal-header"><h3 id="detalle-caso-titulo">Detalle del Caso</h3><button class="ori-modal-close" data-close="modal-detalle-caso">✕</button></div>
+    <div class="ori-modal-body">
+      <div class="ori-workflow" id="detalle-workflow"></div>
+      <div style="margin-top:14px;"><p style="font-size:12px;font-weight:600;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Historial de Intervenciones</p><div id="detalle-intervenciones-lista"></div></div>
+    </div>
+    <div class="ori-modal-footer"><button class="ori-btn-ghost" data-close="modal-detalle-caso">Cerrar</button><button class="ori-btn-primary" id="detalle-btn-intervencion">+ Intervención</button></div>
+  </div>
+</div>
+
+<!-- Perfil Orientador -->
+<div class="ori-modal-backdrop" id="modal-perfil" style="display:none;">
+  <div class="ori-modal">
+    <div class="ori-modal-header"><h3>Mi Perfil</h3><button class="ori-modal-close" data-close="modal-perfil">✕</button></div>
+    <div class="ori-modal-body">
+      <div id="perfil-loading-ori" class="ori-loading"><div class="ori-spinner"></div><span>Cargando datos del perfil…</span></div>
+      <div id="perfil-contenido-ori" style="display:none;">
+        <div id="perfil-foto-widget-ori" style="margin-bottom:16px;"></div>
+        <p style="font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Información <span style="font-weight:400;">(solo lectura)</span></p>
+        <div class="ori-perfil-field"><span>Nombre</span><strong id="pfil-nombre">—</strong></div>
+        <div class="ori-perfil-field"><span>Documento</span><strong id="pfil-documento">—</strong></div>
+        <div class="ori-perfil-field"><span>Sede</span><strong id="pfil-sede">—</strong></div>
+        <div class="ori-perfil-field"><span>Rol</span><strong id="pfil-rol">Orientador</strong></div>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #eee;">
+        <p style="font-size:11px;color:var(--ori-accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Datos editables</p>
+        <div class="ori-form-group"><label>Usuario</label><input type="text" class="ori-input" id="pfil-usuario" placeholder="Tu usuario de acceso"></div>
+        <div class="ori-form-group"><label>Teléfono</label><input type="tel" class="ori-input" id="pfil-telefono" placeholder="Número de teléfono"></div>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #eee;">
+        <p style="font-size:11px;color:#e65100;font-weight:600;margin-bottom:10px;">Cambiar contraseña</p>
+        <div class="ori-form-group"><label>Contraseña actual</label><input type="password" class="ori-input" id="pfil-passact" placeholder="Ingresa tu contraseña actual"></div>
+        <div class="ori-form-group"><label>Nueva contraseña</label><input type="password" class="ori-input" id="pfil-passnew" placeholder="Mínimo 6 caracteres"></div>
+        <div class="ori-form-group"><label>Confirmar nueva contraseña</label><input type="password" class="ori-input" id="pfil-passconf" placeholder="Repite la nueva contraseña"></div>
+        <div id="pfil-feedback" style="display:none;padding:10px;border-radius:8px;font-size:13px;text-align:center;margin-top:8px;"></div>
+      </div>
+    </div>
+    <div class="ori-modal-footer" id="perfil-footer-ori" style="display:none;">
+      <button class="ori-btn-ghost" data-close="modal-perfil">Cancelar</button>
+      <button class="ori-btn-primary" id="pfil-btn-guardar">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="psico-toast" class="ori-toast" style="display:none;"></div>
+
+<script src="session_timeout.js"></script>
+<script src="supabase_fotos.js"></script>
+<script src="script_orientador_psico.js"></script>
+</body>
+</html>

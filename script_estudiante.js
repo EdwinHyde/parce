@@ -12,7 +12,7 @@ function sheetUrl(sheetName) {
 
 // ── Estado global ──
 let G = {
-  nombre:'', grado:'', sede:'', id:'',
+  nombre:'', grado:'', sede:'', id:'', fotoUrl:'',
   periodoActual:'1', periodoSelect:'1',
   consolidado:[], promGenerales:null,
   asistencia:[], observaciones:[], avisos:[], cuadroHonor:[],
@@ -230,6 +230,11 @@ window.addEventListener('DOMContentLoaded', () => {
         renderReconocimientos();
         renderObservaciones();
         verificarNovedades();
+        // Si tiene foto, actualizar avatar del header
+        if (G.fotoUrl) {
+          const topAv = document.getElementById('top-avatar');
+          if (topAv) topAv.innerHTML = `<img src="${G.fotoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        }
         // Verificar novedades cada 3 minutos
         setInterval(async () => {
           G.observaciones = [];
@@ -293,13 +298,19 @@ async function fetchConsolidado() {
       const iId   = hEst.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
       const iNom  = hEst.findIndex(h => norm(h).includes('NOMBRE'));
       const iGrad = hEst.findIndex(h => norm(h) === 'GRADO');
+      const iFoto = hEst.findIndex(h => norm(h) === 'FOTO_URL');
       for (const row of dataEst.values.slice(1)) {
         const rowNom  = norm(String(row[iNom] ||''));
         const rowGrad = norm(String(row[iGrad]||''));
         const gradoN  = norm(G.grado), nomN = norm(G.nombre);
-        const matchNom  = rowNom && nomN && (rowNom.includes(nomN.split(' ')[0]) || nomN.includes(rowNom.split(' ')[0]));
+        // Match estricto: nombre completo normalizado + grado
+        const matchNom  = rowNom && nomN && rowNom === nomN;
         const matchGrad = !gradoN || rowGrad.includes(gradoN) || gradoN.includes(rowGrad);
-        if (matchNom && matchGrad) { G.id = iId >= 0 ? String(row[iId]||'').trim() : ''; break; }
+        if (matchNom && matchGrad) {
+          G.id = iId >= 0 ? String(row[iId]||'').trim() : '';
+          G.fotoUrl = iFoto >= 0 ? String(row[iFoto]||'').trim() : '';
+          break;
+        }
       }
     }
 
@@ -316,7 +327,7 @@ async function fetchConsolidado() {
         const rowGrad = norm(String(row[iGradCal]||''));
         const gradoN  = norm(G.grado);
         const matchId   = G.id && rowId === G.id;
-        const matchNom  = rowNom && norm(G.nombre).split(' ')[0] && rowNom.includes(norm(G.nombre).split(' ')[0]);
+        const matchNom  = rowNom && norm(G.nombre) && rowNom === norm(G.nombre);
         const matchGrad = !gradoN || rowGrad.includes(gradoN) || gradoN.includes(rowGrad);
         if ((matchId || matchNom) && matchGrad) G.consolidado.push({ headers, row });
       }
@@ -332,7 +343,7 @@ async function fetchConsolidado() {
         const rowId  = String(row[iIdC] ||'').trim();
         const rowNom = norm(String(row[iNomC]||''));
         const matchId  = G.id && rowId === G.id;
-        const matchNom = rowNom && norm(G.nombre).split(' ')[0] && rowNom.includes(norm(G.nombre).split(' ')[0]);
+        const matchNom = rowNom && norm(G.nombre) && rowNom === norm(G.nombre);
         if (matchId || matchNom) { G.promGenerales = { headers: hC, row }; break; }
       }
     }
@@ -392,7 +403,7 @@ async function fetchAsistencia() {
       const rowNom  = norm(String(row[iNom]||''));
       const matchId   = G.id && rowId === G.id;
       const matchNoId = G.id && rowNoId === G.id;
-      const matchNom  = rowNom && norm(G.nombre).split(' ')[0] && rowNom.includes(norm(G.nombre).split(' ')[0]);
+      const matchNom  = rowNom && norm(G.nombre) && rowNom === norm(G.nombre);
       if (matchId || matchNoId || matchNom) { G.asistencia = [{ headers, row }]; break; }
     }
   } catch(e) { console.error('Asistencia:', e); }
@@ -407,14 +418,20 @@ async function fetchObservaciones() {
     const data = await res.json();
     if (!data.values || data.values.length < 2) return;
     const headers = data.values[0];
-    const iId     = headers.findIndex(h => norm(h).includes('ID') || norm(h).includes('IDENTIFICADOR'));
+    const iId     = headers.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
     const iNombre = headers.findIndex(h => norm(h).includes('NOMBRE'));
+    const iGrado  = headers.findIndex(h => norm(h) === 'GRADO');
     for (const row of data.values.slice(1)) {
       const rid     = String(row[iId]    ||'').trim();
       const rnombre = norm(String(row[iNombre]||''));
-      const matchId     = G.id && rid === G.id.trim();
-      const matchNombre = rnombre && norm(G.nombre).split(' ')[0] && rnombre.includes(norm(G.nombre).split(' ')[0]);
-      if (matchId || matchNombre) {
+      const rgrado  = iGrado >= 0 ? norm(String(row[iGrado]||'')) : '';
+
+      // Match estricto: primero por ID (documento), luego por nombre COMPLETO + grado
+      const matchId = G.id && rid === G.id.trim();
+      const matchNombreCompleto = rnombre && norm(G.nombre) && rnombre === norm(G.nombre);
+      const matchGrado = !G.grado || !rgrado || norm(G.grado) === rgrado || rgrado.includes(norm(G.grado)) || norm(G.grado).includes(rgrado);
+
+      if (matchId || (matchNombreCompleto && matchGrado)) {
         const iTipo = headers.findIndex(h => norm(h) === 'TIPO');
         const tipo  = iTipo >= 0 ? String(row[iTipo]||'Observación').trim() : 'Observación';
         G.observaciones.push({ headers, row, tipo });
@@ -765,8 +782,8 @@ function renderPerfil() {
   if (!card) return;
   card.innerHTML = `
     <div class="perfil-card">
+      <div id="estudiante-foto-widget" style="margin-bottom:10px;"></div>
       <div class="perfil-avatar-row">
-        <div class="perfil-avatar">${(G.nombre[0]||'?').toUpperCase()}</div>
         <div>
           <div class="perfil-nombre">${G.nombre}</div>
           <span class="perfil-rol">🎒 Estudiante</span>
@@ -791,6 +808,32 @@ function renderPerfil() {
         Si hay un error en tus datos, comunícate con secretaría.
       </div>
     </div>`;
+
+  // Inicializar widget de foto si Supabase está configurado
+  if (typeof crearWidgetFotoPerfil === 'function') {
+    crearWidgetFotoPerfil({
+      containerId: 'estudiante-foto-widget',
+      fotoUrl: G.fotoUrl || null,
+      iniciales: (G.nombre[0] || '?').toUpperCase(),
+      tipoUsuario: 'estudiante',
+      identificador: G.id || G.nombre,
+      onSubida: async (url) => {
+        G.fotoUrl = url;
+        try {
+          await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              tipo: 'guardarFotoUrl',
+              tipoUsuario: 'estudiante',
+              nombre: G.nombre,
+              identificador: G.id,
+              fotoUrl: url
+            })
+          });
+        } catch(e) { console.error('Error guardando URL de foto:', e); }
+      }
+    });
+  }
 
   const pwdCard = document.querySelector('.cambiar-pwd-card');
   if (pwdCard && !pwdCard.querySelector('.cambiar-pwd-header')) {
@@ -891,6 +934,6 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   if (confirm('¿Seguro que quieres cerrar sesión?')) {
     sessionStorage.clear();
     localStorage.clear();
-    window.location.href = 'Index.html';
+    window.location.href = 'index.html';
   }
 });

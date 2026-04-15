@@ -188,6 +188,7 @@ function procesarRedireccion(user) {
     const rutas = {
         'Administrador': 'admin_inicio.html',
         'Docente':       'docente_inicio.html',
+        'Orientador':    'orientador_inicio.html',
         'Acudiente':     'acudiente_inicio.html',
     };
 
@@ -234,6 +235,7 @@ function rolLabel(rol) {
     const labels = {
         'Administrador': '👨‍💼 Administrador',
         'Docente':       '👩‍🏫 Docente',
+        'Orientador':    '🧭 Orientador',
         'Estudiante':    '🎒 Estudiante',
         'Acudiente':     '👨‍👧 Acudiente',
     };

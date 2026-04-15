@@ -129,7 +129,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 
 document.getElementById('btn-logout').addEventListener('click', () => {
   if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-    window.location.href = 'Index.html';
+    window.location.href = 'index.html';
   }
 });
 

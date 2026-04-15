@@ -126,7 +126,7 @@ function ordenarGrados(grados) {
 //  LOGOUT
 // ════════════════════════════════════════════════════════
 document.getElementById('btn-logout').addEventListener('click', () => {
-  if (confirm('¿Cerrar sesión?')) window.location.href = 'Index.html';
+  if (confirm('¿Cerrar sesión?')) window.location.href = 'index.html';
 });
 
 // ════════════════════════════════════════════════════════
@@ -145,272 +145,470 @@ document.getElementById('sidebar-overlay').addEventListener('click', () => {
 // ════════════════════════════════════════════════════════
 //  MÓDULO: DASHBOARD
 // ════════════════════════════════════════════════════════
+
+// Cache de datos del dashboard para no re-fetchar al cambiar periodo
+let _dashboardData = null;
+let _dashboardPeriodos = [];
+
 async function cargarDashboard() {
+  // Limpiar cache al entrar al dashboard
+  _dashboardData = null;
+  _dashboardPeriodos = [];
+
+  // Mostrar spinners
+  ['dash-semaforo','dash-barras','dash-top3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<div class="module-loading"><div class="ring-loader"></div><p>Cargando...</p></div>';
+  });
+
   try {
-    // Carga paralela de todas las hojas necesarias
     const [dataEst, dataPer, dataUs, dataCalif, dataAsist] = await Promise.all([
       fetchSheet(SHEETS.estudiantes),
       fetchSheet(SHEETS.periodos),
       fetchSheet(SHEETS.usuarios),
       fetchSheet('Calificaciones'),
-      fetchSheet('CONSOLIDADO_ASISTENCIA')
+      fetchSheet('Asistencia')
     ]);
 
-    // ── 1. Banner periodo activo ──────────────────────
+    // Guardar en cache
+    _dashboardData = { dataEst, dataPer, dataUs, dataCalif, dataAsist };
+
+    // ── 1. Procesar periodos disponibles ─────────────────
     const hoy = new Date(); hoy.setHours(0,0,0,0);
-    let periodoActivo = null;
+    _dashboardPeriodos = [];
 
     if (!dataPer.error && dataPer.values?.length > 1) {
-      const hPer = dataPer.values[0].map(h => h.trim());
-      const iNum = hPer.findIndex(h => norm(h).includes('PERIODO'));
-      const iIni = hPer.findIndex(h => norm(h).includes('INICIO'));
-      const iFin = hPer.findIndex(h => norm(h).includes('FINAL') && !norm(h).includes('CIERRE'));
-      const iCie = hPer.findIndex(h => norm(h).includes('CIERRE'));
+      const hPer  = dataPer.values[0].map(h => h.trim());
+      const iNum  = hPer.findIndex(h => norm(h).includes('PERIODO'));
+      const iIni  = hPer.findIndex(h => norm(h).includes('INICIO'));
+      const iFin  = hPer.findIndex(h => (norm(h).includes('FINAL') || norm(h).includes('FIN')) && !norm(h).includes('CIERRE') && !norm(h).includes('SISTEMA'));
+      const iCie  = hPer.findIndex(h => norm(h).includes('CIERRE') && norm(h).includes('SISTEMA'));
+      const iFinA = hPer.findIndex(h => (norm(h).includes('FINAL') || norm(h).includes('FIN')) && !norm(h).includes('CIERRE'));
 
       dataPer.values.slice(1).forEach(row => {
-        const ini = parseFecha(row[iIni]);
-        const fin = parseFecha(row[iFin]);
-        if (ini && fin && hoy >= ini && hoy <= fin) {
-          periodoActivo = {
-            num:    String(row[iNum]||'').trim(),
-            inicio: ini, fin, cierre: iCie >= 0 ? parseFecha(row[iCie]) : null
-          };
-        }
-      });
-
-      const cardTxt = document.getElementById('dash-periodo-titulo');
-      const cardSub = document.getElementById('dash-periodo-sub');
-      const badges  = document.getElementById('dash-periodo-badges');
-      if (periodoActivo) {
-        cardTxt.textContent = `Periodo ${periodoActivo.num} en curso`;
-        cardSub.textContent = `${formatFecha(periodoActivo.inicio)} — ${formatFecha(periodoActivo.fin)}`;
-        const abierto = periodoActivo.cierre ? hoy <= periodoActivo.cierre : true;
-        badges.innerHTML = `
-          <span class="periodo-badge ${abierto?'open':'closed'}">${abierto?'Sistema Habilitado':'Sistema cerrado'}</span>
-          ${periodoActivo.cierre ? `<span class="periodo-badge">Límite: ${formatFecha(periodoActivo.cierre)}</span>` : ''}`;
-      } else {
-        cardTxt.textContent = 'Periodo de descanso';
-        cardSub.textContent = 'Revisa el módulo de periodos';
-        badges.innerHTML = '<span class="periodo-badge">Entre periodos</span>';
-      }
-    }
-
-    const numPeriodo = periodoActivo ? periodoActivo.num : null;
-
-    // ── 2. Mapa de nombres: idEstudiante → nombre ─────
-    const mapaNombres = {}; // id_estudiante → nombre
-    const mapaGrado   = {}; // id_estudiante → grado
-    if (!dataEst.error && dataEst.values?.length > 1) {
-      const hE  = dataEst.values[0].map(h => h.trim());
-      const iNm = hE.findIndex(h => norm(h) === 'NOMBRES_APELLIDOS');
-      const iId = hE.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
-      const iGr = hE.findIndex(h => norm(h) === 'GRADO');
-      dataEst.values.slice(1).forEach(r => {
-        const id = (r[iId]||'').trim();
-        if (id) {
-          mapaNombres[id] = (r[iNm]||'').trim();
-          mapaGrado[id]   = (r[iGr]||'').trim();
-        }
+        const num = String(row[iNum]||'').trim();
+        if (!num) return;
+        const ini  = iIni  >= 0 ? parseFecha(row[iIni])  : null;
+        const fin  = iFin  >= 0 ? parseFecha(row[iFin])  : (iFinA >= 0 ? parseFecha(row[iFinA]) : null);
+        const cie  = iCie  >= 0 ? parseFecha(row[iCie])  : null;
+        const activo = ini && fin && hoy >= ini && hoy <= fin;
+        _dashboardPeriodos.push({ num, ini, fin, cie, activo });
       });
     }
 
-    // ── 3. Análisis de Calificaciones ─────────────────
-    const enRiesgoIds     = new Set();  // ids con promedio < 3
-    const bajosPorEst     = {};         // id → cantidad asigs en BAJO
-    const promediosPorEst = {};         // id → promedio (para top3)
-    const promediosPorGrado = {};       // grado → [promedios]
+    // ── 2. Construir selector de periodos ─────────────────
+    const sel = document.getElementById('dash-select-periodo');
+    if (sel && _dashboardPeriodos.length) {
+      sel.innerHTML = '';
+      // Detectar periodo activo o usar el último
+      let periodoDefault = _dashboardPeriodos.find(p => p.activo);
+      if (!periodoDefault) periodoDefault = _dashboardPeriodos[_dashboardPeriodos.length - 1];
 
-    if (!dataCalif.error && dataCalif.values?.length > 1 && numPeriodo) {
-      const hC   = dataCalif.values[0].map(h => h.trim());
-      const iP   = hC.findIndex(h => norm(h) === 'PERIODO');
-      const iId  = hC.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
-      const iProm= hC.findIndex(h => norm(h).includes('PROMEDIO'));
-      const iDesp= hC.findIndex(h => norm(h).includes('DESEMPE'));
-      const iGr  = hC.findIndex(h => norm(h) === 'GRADO');
-
-      dataCalif.values.slice(1).forEach(row => {
-        if (String(row[iP]||'').trim() !== String(numPeriodo)) return;
-        const id   = (row[iId]||'').trim();
-        if (!id) return;
-        const prom = parseFloat(String(row[iProm]||'').replace(',','.'));
-        const desp = norm(row[iDesp]||'');
-        const grad = (row[iGr]||'').trim() || mapaGrado[id] || '';
-
-        if (!isNaN(prom) && prom > 0) {
-          // Para promediosPorEst guardamos el promedio mínimo (peor asignatura no, sino promediamos)
-          if (!promediosPorEst[id]) promediosPorEst[id] = { suma: 0, count: 0, grado: grad };
-          promediosPorEst[id].suma  += prom;
-          promediosPorEst[id].count += 1;
-
-          if (prom < 3.0) enRiesgoIds.add(id);
-
-          if (grad) {
-            if (!promediosPorGrado[grad]) promediosPorGrado[grad] = [];
-            promediosPorGrado[grad].push(prom);
-          }
-        }
-
-        if (desp === 'BAJO') {
-          bajosPorEst[id] = (bajosPorEst[id]||0) + 1;
-        }
+      _dashboardPeriodos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.num;
+        opt.textContent = p.activo ? `Periodo ${p.num} (actual)` : `Periodo ${p.num}`;
+        if (p.num === periodoDefault?.num) opt.selected = true;
+        sel.appendChild(opt);
       });
-    }
 
-    // ── Tarjeta 1: Estudiantes en riesgo ──────────────
-    document.getElementById('dash-en-riesgo').textContent = enRiesgoIds.size;
-    document.getElementById('dash-en-riesgo-sub').textContent =
-      numPeriodo ? `con promedio < 3.0 en periodo ${numPeriodo}` : 'sin periodo activo';
+      document.getElementById('dash-periodo-controles').style.display = 'flex';
+      document.getElementById('dash-periodo-controles').style.alignItems = 'center';
+      document.getElementById('dash-periodo-controles').style.flexWrap = 'wrap';
+      document.getElementById('dash-periodo-controles').style.gap = '8px';
 
-    // ── Tarjeta 3: Grado con más estudiantes en riesgo
-    const riesgoPorGrado = {};
-    enRiesgoIds.forEach(id => {
-      const g = mapaGrado[id] || promediosPorEst[id]?.grado || '';
-      if (g) riesgoPorGrado[g] = (riesgoPorGrado[g]||0) + 1;
-    });
-    const gradoMasRiesgo = Object.entries(riesgoPorGrado).sort((a,b) => b[1]-a[1])[0];
-    if (gradoMasRiesgo) {
-      document.getElementById('dash-grado-riesgo').textContent     = gradoMasRiesgo[0];
-      document.getElementById('dash-grado-riesgo-sub').textContent =
-        `${gradoMasRiesgo[1]} estudiante${gradoMasRiesgo[1]!==1?'s':''} en riesgo`;
-    } else {
-      document.getElementById('dash-grado-riesgo').textContent     = '—';
-      document.getElementById('dash-grado-riesgo-sub').textContent = 'sin datos del periodo';
-    }
-
-    // ── Tarjeta 4: Más asignaturas en BAJO ───────────
-    const masRiesgo = Object.entries(bajosPorEst).sort((a,b) => b[1]-a[1])[0];
-    if (masRiesgo) {
-      const [idR, cantR] = masRiesgo;
-      const nombreCorto  = (mapaNombres[idR]||'Sin nombre').split(' ').slice(0,2).join(' ');
-      document.getElementById('dash-mas-bajo-nombre').textContent = nombreCorto;
-      document.getElementById('dash-mas-bajo-sub').textContent =
-        `${cantR} asignatura${cantR!==1?'s':''} en BAJO · ${mapaGrado[idR]||''}`;
-    } else {
-      document.getElementById('dash-mas-bajo-nombre').textContent = '—';
-      document.getElementById('dash-mas-bajo-sub').textContent    = 'sin datos del periodo';
-    }
-
-    // ── 4. Análisis de Asistencia (fallas) ───────────
-    const fallasPorEst = {};  // id → total fallas
-    if (!dataAsist.error && dataAsist.values?.length > 1 && numPeriodo) {
-      const hA    = dataAsist.values[0].map(h => h.trim());
-      const iId   = hA.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
-      // Columnas de fallas del periodo activo: busca patrones como FALLAS_P1, CODIGO_P1, etc.
-      // O suma todas las columnas que contengan 'FALLAS' o el periodo actual
-      const colsFallas = hA.map((h,i) => ({ h, i }))
-        .filter(c => norm(c.h).includes('FALLAS') || norm(c.h).includes(`_P${numPeriodo}`));
-
-      dataAsist.values.slice(1).forEach(row => {
-        const id = (row[iId]||'').trim();
-        if (!id) return;
-        let total = 0;
-        colsFallas.forEach(c => {
-          const v = parseInt(row[c.i])||0;
-          total += v;
-        });
-        if (total > 0) fallasPorEst[id] = (fallasPorEst[id]||0) + total;
+      sel.addEventListener('change', () => {
+        renderizarDashboard(sel.value);
       });
-    }
 
-    // ── Tarjeta 2: Mayor ausentismo ───────────────────
-    const masFallas = Object.entries(fallasPorEst).sort((a,b) => b[1]-a[1])[0];
-    if (masFallas) {
-      const [idF, cantF] = masFallas;
-      const nombreCorto  = (mapaNombres[idF]||'Sin nombre').split(' ').slice(0,2).join(' ');
-      document.getElementById('dash-mas-fallas-nombre').textContent = nombreCorto;
-      document.getElementById('dash-mas-fallas-sub').textContent =
-        `${cantF} falla${cantF!==1?'s':''} · ${mapaGrado[idF]||''}`;
+      document.getElementById('dash-btn-excel').addEventListener('click', () => {
+        exportarExcelPeriodo(sel.value);
+      });
+
+      await renderizarDashboard(periodoDefault?.num || _dashboardPeriodos[0]?.num);
     } else {
-      document.getElementById('dash-mas-fallas-nombre').textContent = '—';
-      document.getElementById('dash-mas-fallas-sub').textContent    = 'sin registros de asistencia';
-    }
-
-    // ── 5. Top 3 mejores promedios ────────────────────
-    const top3 = Object.entries(promediosPorEst)
-      .map(([id, d]) => ({
-        id,
-        nombre: mapaNombres[id] || id,
-        grado:  d.grado || mapaGrado[id] || '—',
-        prom:   d.count > 0 ? d.suma / d.count : 0
-      }))
-      .filter(e => e.prom > 0)
-      .sort((a,b) => b.prom - a.prom)
-      .slice(0, 3);
-
-    const medallas = ['🥇','🥈','🥉'];
-    const colTop   = ['#f59e0b','#94a3b8','#b45309'];
-
-    document.getElementById('dash-top3').innerHTML = top3.length
-      ? top3.map((e, i) => `
-          <div class="top3-item">
-            <div class="top3-medalla" style="color:${colTop[i]}">${medallas[i]}</div>
-            <div class="top3-info">
-              <div class="top3-nombre">${e.nombre}</div>
-              <div class="top3-grado">${e.grado}</div>
-            </div>
-            <div class="top3-prom" style="color:${colTop[i]}">${e.prom.toFixed(2)}</div>
-          </div>`).join('')
-      : '<div class="empty-state"><p>Sin datos del periodo activo.</p></div>';
-
-    // ── 6. Semáforo por grado ─────────────────────────
-    const gradosOrdenados = ordenarGrados(Object.keys(promediosPorGrado));
-    if (!gradosOrdenados.length) {
-      document.getElementById('dash-semaforo').innerHTML =
-        '<div class="empty-state"><p>Sin datos de calificaciones en el periodo activo.</p></div>';
-    } else {
-      document.getElementById('dash-semaforo').innerHTML = `
-        <div class="semaforo-grid">
-          ${gradosOrdenados.map(g => {
-            const proms  = promediosPorGrado[g];
-            const avg    = proms.reduce((a,b)=>a+b,0) / proms.length;
-            const color  = avg >= 4.0 ? 'sem-verde' : avg >= 3.0 ? 'sem-amarillo' : 'sem-rojo';
-            const etiq   = avg >= 4.0 ? 'ALTO' : avg >= 3.0 ? 'BÁSICO' : 'BAJO';
-            const riesgo = proms.filter(p => p < 3.0).length;
-            return `
-              <div class="sem-card ${color}">
-                <div class="sem-grado">${g}</div>
-                <div class="sem-avg">${avg.toFixed(2)}</div>
-                <div class="sem-label">${etiq}</div>
-                ${riesgo > 0 ? `<div class="sem-riesgo">⚠️ ${riesgo} en riesgo</div>` : ''}
-              </div>`;
-          }).join('')}
-        </div>`;
-    }
-
-    // ── 7. Gráfico de barras por grado ────────────────
-    if (!gradosOrdenados.length) {
-      document.getElementById('dash-barras').innerHTML =
-        '<div class="empty-state"><p>Sin datos de calificaciones en el periodo activo.</p></div>';
-    } else {
-      const maxProm = 5.0;
-      document.getElementById('dash-barras').innerHTML = `
-        <div class="barras-wrap">
-          ${gradosOrdenados.map(g => {
-            const proms = promediosPorGrado[g];
-            const avg   = proms.reduce((a,b)=>a+b,0) / proms.length;
-            const pct   = Math.round((avg / maxProm) * 100);
-            const color = avg >= 4.0 ? '#16a34a' : avg >= 3.0 ? '#d97706' : '#dc2626';
-            return `
-              <div class="barra-row">
-                <div class="barra-label">${g}</div>
-                <div class="barra-track">
-                  <div class="barra-fill" style="width:${pct}%;background:${color};"></div>
-                </div>
-                <div class="barra-valor" style="color:${color};">${avg.toFixed(2)}</div>
-              </div>`;
-          }).join('')}
-          <div class="barra-leyenda">
-            <span style="color:#16a34a;">● ALTO ≥4.0</span>
-            <span style="color:#d97706;">● BÁSICO ≥3.0</span>
-            <span style="color:#dc2626;">● BAJO &lt;3.0</span>
-          </div>
-        </div>`;
+      await renderizarDashboard(null);
     }
 
   } catch(err) {
-    console.error('Error dashboard:', err);
+    console.error('[Dashboard Admin] Error:', err);
+    ['dash-semaforo','dash-barras','dash-top3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div class="empty-state"><p>Error al cargar datos. Revisa la consola.</p></div>';
+    });
   }
 }
+
+async function renderizarDashboard(numPeriodoSel) {
+  if (!_dashboardData) return;
+  const { dataEst, dataPer, dataCalif, dataAsist } = _dashboardData;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+  const periodoInfo = _dashboardPeriodos.find(p => p.num === String(numPeriodoSel)) || null;
+  const numPeriodo  = numPeriodoSel ? String(numPeriodoSel).trim() : null;
+
+  // ── Banner ────────────────────────────────────────────
+  const cardTxt = document.getElementById('dash-periodo-titulo');
+  const cardSub = document.getElementById('dash-periodo-sub');
+  const badges  = document.getElementById('dash-periodo-badges');
+
+  if (periodoInfo) {
+    const esActual  = periodoInfo.activo;
+    const esPasado  = periodoInfo.fin && hoy > periodoInfo.fin;
+    cardTxt.textContent = esActual
+      ? `Periodo ${periodoInfo.num} en curso`
+      : esPasado
+        ? `Periodo ${periodoInfo.num} — Finalizado`
+        : `Periodo ${periodoInfo.num}`;
+    cardSub.textContent = periodoInfo.ini && periodoInfo.fin
+      ? `${formatFecha(periodoInfo.ini)} — ${formatFecha(periodoInfo.fin)}`
+      : 'Fechas no configuradas';
+    const abierto = periodoInfo.cie ? hoy <= periodoInfo.cie : esActual;
+    badges.innerHTML = esActual
+      ? `<span class="periodo-badge ${abierto?'open':'closed'}">${abierto?'Sistema Habilitado':'Sistema cerrado'}</span>
+         ${periodoInfo.cie ? `<span class="periodo-badge">Límite: ${formatFecha(periodoInfo.cie)}</span>` : ''}`
+      : esPasado
+        ? '<span class="periodo-badge closed">Periodo cerrado</span>'
+        : '<span class="periodo-badge">Próximo</span>';
+  } else {
+    cardTxt.textContent = 'Sin periodos configurados';
+    cardSub.textContent = 'Ve al módulo de Periodos para agregar uno';
+    badges.innerHTML = '';
+  }
+
+  // Actualizar etiquetas dinámicas
+  const labelPer = numPeriodo ? `Periodo ${numPeriodo}` : 'Periodo actual';
+  const elLabelSem = document.getElementById('dash-label-periodo-semaforo');
+  const elLabelBar = document.getElementById('dash-label-periodo-barras');
+  if (elLabelSem) elLabelSem.textContent = labelPer;
+  if (elLabelBar) elLabelBar.textContent = labelPer;
+
+  // ── Verificar si el botón Excel debe mostrarse ─────────
+  // Solo se muestra si el periodo ya finalizó (fecha fin < hoy)
+  const btnExcel = document.getElementById('dash-btn-excel');
+  if (btnExcel) {
+    const periodoFinalizado = periodoInfo && periodoInfo.fin && hoy > periodoInfo.fin;
+    btnExcel.style.display = periodoFinalizado ? 'flex' : 'none';
+  }
+
+  // ── Mapa de nombres y grados ─────────────────────────
+  const mapaNombres = {};
+  const mapaGrado   = {};
+  const mapaGradoInfo = {}; // grado → { nombre, estado }
+  if (!dataEst.error && dataEst.values?.length > 1) {
+    const hE  = dataEst.values[0].map(h => h.trim());
+    const iNm = hE.findIndex(h => norm(h) === 'NOMBRES_APELLIDOS' || norm(h).includes('NOMBRE'));
+    const iId = hE.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
+    const iGr = hE.findIndex(h => norm(h) === 'GRADO');
+    dataEst.values.slice(1).forEach(r => {
+      const id = (r[iId]||'').trim();
+      if (id) {
+        mapaNombres[id] = (r[iNm]||'').trim();
+        mapaGrado[id]   = (r[iGr]||'').trim();
+      }
+    });
+  }
+
+  // ── Análisis de Calificaciones ────────────────────────
+  const enRiesgoIds      = new Set();
+  const bajosPorEst      = {};
+  const promediosPorEst  = {};
+  const promediosPorGrado= {};
+
+  if (!dataCalif.error && dataCalif.values?.length > 1 && numPeriodo) {
+    const hC    = dataCalif.values[0].map(h => h.trim());
+    const iP    = hC.findIndex(h => norm(h) === 'PERIODO');
+    const iId   = hC.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
+    const iProm = hC.findIndex(h => norm(h).includes('PROMEDIO'));
+    const iDesp = hC.findIndex(h => norm(h).includes('DESEMPE'));
+    const iGr   = hC.findIndex(h => norm(h) === 'GRADO');
+
+    dataCalif.values.slice(1).forEach(row => {
+      const rowPer = String(row[iP]||'').trim().replace(/\.0$/,'');
+      const numPer = numPeriodo.replace(/\.0$/,'');
+      if (rowPer !== numPer) return;
+      const id   = (row[iId]||'').trim();
+      if (!id) return;
+      const prom = parseFloat(String(row[iProm]||'').replace(',','.'));
+      const desp = norm(row[iDesp]||'');
+      const grad = (row[iGr]||'').trim() || mapaGrado[id] || '';
+
+      if (!isNaN(prom) && prom > 0) {
+        if (!promediosPorEst[id]) promediosPorEst[id] = { suma:0, count:0, grado:grad };
+        promediosPorEst[id].suma  += prom;
+        promediosPorEst[id].count += 1;
+        if (prom < 3.0) enRiesgoIds.add(id);
+        if (grad) {
+          if (!promediosPorGrado[grad]) promediosPorGrado[grad] = [];
+          promediosPorGrado[grad].push(prom);
+        }
+      }
+      if (desp === 'BAJO') bajosPorEst[id] = (bajosPorEst[id]||0) + 1;
+    });
+  }
+
+  // ── Tarjeta 1: Estudiantes en riesgo ─────────────────
+  document.getElementById('dash-en-riesgo').textContent = enRiesgoIds.size || '0';
+  document.getElementById('dash-en-riesgo-sub').textContent = numPeriodo
+    ? `con promedio < 3.0 en periodo ${numPeriodo}`
+    : 'configura un periodo activo';
+
+  // ── Tarjeta 3: Grado con más riesgo ──────────────────
+  const riesgoPorGrado = {};
+  enRiesgoIds.forEach(id => {
+    const g = mapaGrado[id] || promediosPorEst[id]?.grado || '';
+    if (g) riesgoPorGrado[g] = (riesgoPorGrado[g]||0) + 1;
+  });
+  const gradoMasRiesgo = Object.entries(riesgoPorGrado).sort((a,b) => b[1]-a[1])[0];
+  if (gradoMasRiesgo) {
+    document.getElementById('dash-grado-riesgo').textContent     = gradoMasRiesgo[0];
+    document.getElementById('dash-grado-riesgo-sub').textContent =
+      `${gradoMasRiesgo[1]} estudiante${gradoMasRiesgo[1]!==1?'s':''} en riesgo`;
+  } else {
+    document.getElementById('dash-grado-riesgo').textContent     = '—';
+    document.getElementById('dash-grado-riesgo-sub').textContent = 'sin datos del periodo';
+  }
+
+  // ── Tarjeta 4: Más asignaturas en BAJO ───────────────
+  const masRiesgo = Object.entries(bajosPorEst).sort((a,b) => b[1]-a[1])[0];
+  if (masRiesgo) {
+    const [idR, cantR] = masRiesgo;
+    const nombreCorto  = (mapaNombres[idR]||'Sin nombre').split(' ').slice(0,2).join(' ');
+    document.getElementById('dash-mas-bajo-nombre').textContent = nombreCorto;
+    document.getElementById('dash-mas-bajo-sub').textContent =
+      `${cantR} asignatura${cantR!==1?'s':''} en BAJO · ${mapaGrado[idR]||''}`;
+  } else {
+    document.getElementById('dash-mas-bajo-nombre').textContent = '—';
+    document.getElementById('dash-mas-bajo-sub').textContent    = 'sin datos del periodo';
+  }
+
+  // ── Análisis de Asistencia ────────────────────────────
+  const fallasPorEst = {};
+  if (!dataAsist.error && dataAsist.values?.length > 1 && numPeriodo) {
+    const hA   = dataAsist.values[0].map(h => (h||'').trim());
+    const iP   = hA.findIndex(h => norm(h) === 'PERIODO');
+    const iId  = hA.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
+    const iF   = hA.findIndex(h => norm(h) === 'FALLAS');
+    const numPer = numPeriodo.replace(/\.0$/,'');
+    dataAsist.values.slice(1).forEach(row => {
+      const rowPer = String(row[iP]||'').trim().replace(/\.0$/,'');
+      if (rowPer !== numPer) return;
+      const id = iId >= 0 ? (row[iId]||'').trim() : '';
+      if (!id) return;
+      const f = iF >= 0 ? parseInt(row[iF])||0 : 0;
+      if (f > 0) fallasPorEst[id] = (fallasPorEst[id]||0) + f;
+    });
+  }
+
+  // ── Tarjeta 2: Mayor ausentismo ───────────────────────
+  const masFallas = Object.entries(fallasPorEst).sort((a,b) => b[1]-a[1])[0];
+  if (masFallas) {
+    const [idF, cantF] = masFallas;
+    const nombreCorto  = (mapaNombres[idF]||'Sin nombre').split(' ').slice(0,2).join(' ');
+    document.getElementById('dash-mas-fallas-nombre').textContent = nombreCorto;
+    document.getElementById('dash-mas-fallas-sub').textContent =
+      `${cantF} falla${cantF!==1?'s':''} · ${mapaGrado[idF]||''}`;
+  } else {
+    document.getElementById('dash-mas-fallas-nombre').textContent = '—';
+    document.getElementById('dash-mas-fallas-sub').textContent    = 'sin registros de asistencia';
+  }
+
+  // ── Top 3 mejores promedios ───────────────────────────
+  const top3 = Object.entries(promediosPorEst)
+    .map(([id, d]) => ({
+      id,
+      nombre: mapaNombres[id] || id,
+      grado:  d.grado || mapaGrado[id] || '—',
+      prom:   d.count > 0 ? d.suma / d.count : 0
+    }))
+    .filter(e => e.prom > 0)
+    .sort((a,b) => b.prom - a.prom)
+    .slice(0, 3);
+
+  const medallas = ['🥇','🥈','🥉'];
+  const colTop   = ['#f59e0b','#94a3b8','#b45309'];
+  document.getElementById('dash-top3').innerHTML = top3.length
+    ? top3.map((e, i) => `
+        <div class="top3-item">
+          <div class="top3-medalla" style="color:${colTop[i]}">${medallas[i]}</div>
+          <div class="top3-info">
+            <div class="top3-nombre">${e.nombre}</div>
+            <div class="top3-grado">${e.grado}</div>
+          </div>
+          <div class="top3-prom" style="color:${colTop[i]}">${e.prom.toFixed(2)}</div>
+        </div>`).join('')
+    : `<div class="empty-state"><p>Sin datos del periodo ${numPeriodo||''}.</p></div>`;
+
+  // ── Semáforo por grado ────────────────────────────────
+  const gradosOrdenados = ordenarGrados(Object.keys(promediosPorGrado));
+  if (!gradosOrdenados.length) {
+    document.getElementById('dash-semaforo').innerHTML =
+      `<div class="empty-state"><p>Sin datos de calificaciones para el periodo ${numPeriodo||''}.</p></div>`;
+  } else {
+    document.getElementById('dash-semaforo').innerHTML = `
+      <div class="semaforo-grid">
+        ${gradosOrdenados.map(g => {
+          const proms  = promediosPorGrado[g];
+          const avg    = proms.reduce((a,b)=>a+b,0) / proms.length;
+          const color  = avg >= 4.0 ? 'sem-verde' : avg >= 3.0 ? 'sem-amarillo' : 'sem-rojo';
+          const etiq   = avg >= 4.0 ? 'ALTO' : avg >= 3.0 ? 'BÁSICO' : 'BAJO';
+          const riesgo = proms.filter(p => p < 3.0).length;
+          return `
+            <div class="sem-card ${color}">
+              <div class="sem-grado">${g}</div>
+              <div class="sem-avg">${avg.toFixed(2)}</div>
+              <div class="sem-label">${etiq}</div>
+              ${riesgo > 0 ? `<div class="sem-riesgo">⚠️ ${riesgo} en riesgo</div>` : ''}
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  // ── Barras por grado ──────────────────────────────────
+  if (!gradosOrdenados.length) {
+    document.getElementById('dash-barras').innerHTML =
+      `<div class="empty-state"><p>Sin datos para el periodo ${numPeriodo||''}.</p></div>`;
+  } else {
+    document.getElementById('dash-barras').innerHTML = `
+      <div class="barras-wrap">
+        ${gradosOrdenados.map(g => {
+          const proms = promediosPorGrado[g];
+          const avg   = proms.reduce((a,b)=>a+b,0) / proms.length;
+          const pct   = Math.round((avg / 5.0) * 100);
+          const color = avg >= 4.0 ? '#16a34a' : avg >= 3.0 ? '#d97706' : '#dc2626';
+          return `
+            <div class="barra-row">
+              <div class="barra-label">${g}</div>
+              <div class="barra-track">
+                <div class="barra-fill" style="width:${pct}%;background:${color};"></div>
+              </div>
+              <div class="barra-valor" style="color:${color};">${avg.toFixed(2)}</div>
+            </div>`;
+        }).join('')}
+        <div class="barra-leyenda">
+          <span style="color:#16a34a;">● ALTO ≥4.0</span>
+          <span style="color:#d97706;">● BÁSICO ≥3.0</span>
+          <span style="color:#dc2626;">● BAJO &lt;3.0</span>
+        </div>
+      </div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  EXPORTAR EXCEL — RESUMEN DE PERIODO
+// ════════════════════════════════════════════════════════
+async function exportarExcelPeriodo(numPeriodo) {
+  const btn = document.getElementById('dash-btn-excel');
+  const textoOriginal = btn ? btn.innerHTML : '';
+  if (btn) { btn.innerHTML = '⏳ Generando...'; btn.disabled = true; }
+
+  try {
+    const { dataEst, dataCalif, dataAsist } = _dashboardData;
+    if (!dataEst || !dataCalif) throw new Error('Datos no disponibles');
+
+    const hE   = dataEst.values[0].map(h => (h||'').trim());
+    const iNm  = hE.findIndex(h => norm(h) === 'NOMBRES_APELLIDOS' || norm(h).includes('NOMBRE'));
+    const iId  = hE.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
+    const iGr  = hE.findIndex(h => norm(h) === 'GRADO');
+    const iSe  = hE.findIndex(h => norm(h) === 'SEDE');
+
+    // Excluir Preescolar
+    const estudiantes = dataEst.values.slice(1).filter(r => {
+      const grado = norm((r[iGr]||'').trim());
+      return grado !== 'PREESCOLAR' && grado !== norm('Preescolar');
+    });
+
+    // Construir mapa de calificaciones por estudiante+asignatura
+    const hC    = dataCalif.values[0].map(h => (h||'').trim());
+    const iCP   = hC.findIndex(h => norm(h) === 'PERIODO');
+    const iCId  = hC.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
+    const iCAs  = hC.findIndex(h => norm(h) === 'ASIGNATURA');
+    const iCPr  = hC.findIndex(h => norm(h).includes('PROMEDIO'));
+    const iCGr  = hC.findIndex(h => norm(h) === 'GRADO');
+
+    const numPer = String(numPeriodo).replace(/\.0$/,'');
+    const califMap = {}; // idEst → { asignatura → promedio }
+    const asignaturasSet = new Set();
+
+    dataCalif.values.slice(1).forEach(row => {
+      const rowPer = String(row[iCP]||'').trim().replace(/\.0$/,'');
+      if (rowPer !== numPer) return;
+      const id   = (row[iCId]||'').trim();
+      const asig = (row[iCAs]||'').trim();
+      const prom = String(row[iCPr]||'').trim();
+      const gr   = (row[iCGr]||'').trim();
+      if (!id || !asig) return;
+      // Excluir Preescolar
+      if (norm(gr) === 'PREESCOLAR' || norm(gr) === norm('Preescolar')) return;
+      if (!califMap[id]) califMap[id] = {};
+      califMap[id][asig] = prom;
+      asignaturasSet.add(asig);
+    });
+
+    // Mapa de inasistencias por estudiante
+    const fallasMap = {};
+    if (!dataAsist.error && dataAsist.values?.length > 1) {
+      const hA  = dataAsist.values[0].map(h => (h||'').trim());
+      const iAP = hA.findIndex(h => norm(h) === 'PERIODO');
+      const iAI = hA.findIndex(h => norm(h) === 'ID_ESTUDIANTE');
+      const iAF = hA.findIndex(h => norm(h) === 'FALLAS');
+      dataAsist.values.slice(1).forEach(row => {
+        const rowPer = String(row[iAP]||'').trim().replace(/\.0$/,'');
+        if (rowPer !== numPer) return;
+        const id = iAI >= 0 ? (row[iAI]||'').trim() : '';
+        if (!id) return;
+        const f = iAF >= 0 ? parseInt(row[iAF])||0 : 0;
+        fallasMap[id] = (fallasMap[id]||0) + f;
+      });
+    }
+
+    const asignaturas = [...asignaturasSet].sort();
+
+    // Construir CSV
+    const encabezado = ['Documento', 'Nombre', 'Sede', 'Grado', 'Inasistencias', ...asignaturas];
+    const filas = [encabezado];
+
+    // Ordenar estudiantes por grado y nombre
+    const estudiantesOrdenados = estudiantes.slice().sort((a, b) => {
+      const ga = (a[iGr]||''), gb = (b[iGr]||'');
+      const ia = ORDEN_GRADOS.indexOf(ga), ib = ORDEN_GRADOS.indexOf(gb);
+      const cmpGrado = (ia===-1&&ib===-1) ? ga.localeCompare(gb) : (ia===-1?1:(ib===-1?-1:ia-ib));
+      if (cmpGrado !== 0) return cmpGrado;
+      return (a[iNm]||'').localeCompare(b[iNm]||'');
+    });
+
+    estudiantesOrdenados.forEach(r => {
+      const id    = iId >= 0 ? (r[iId]||'').trim() : '';
+      const nom   = iNm >= 0 ? (r[iNm]||'').trim() : '';
+      const sede  = iSe >= 0 ? (r[iSe]||'').trim() : '';
+      const grado = iGr >= 0 ? (r[iGr]||'').trim() : '';
+      const fallas= fallasMap[id] || 0;
+      const califs = asignaturas.map(a => califMap[id]?.[a] || '');
+      filas.push([id, nom, sede, grado, fallas, ...califs]);
+    });
+
+    const csvContent = filas.map(f =>
+      f.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')
+    ).join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `Resumen_Periodo_${numPeriodo}_PARCE.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+  } catch(err) {
+    console.error('Error exportando Excel:', err);
+    alert('Error al generar el archivo. Revisa la consola.');
+  } finally {
+    if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+  }
+}
+
 
 // ════════════════════════════════════════════════════════
 //  MÓDULO: USUARIOS
@@ -1322,6 +1520,7 @@ if (btnCargarConsol) btnCargarConsol.addEventListener('click', renderTablaConsol
 // ════════════════════════════════════════════════════════
 
 let estudiantesBoletin = [];
+let headersEstudiantesBoletin = []; // headers sincronizados con estudiantesBoletin
 
 // Cargar filtros
 async function cargarFiltrosBoletines() {
@@ -1433,6 +1632,7 @@ async function cargarEstudiantesBoletinesAutomatico() {
     if (grado && grado !== "todos") filtrados = filtrados.filter(r => (r[iGradoIdx] || '').trim() === grado);
 
     estudiantesBoletin = filtrados;
+    headersEstudiantesBoletin = headers; // ← guardar headers sincronizados
 
     if (filtrados.length === 0) {
       wrap.innerHTML = '<div class="empty-state"><p>No hay estudiantes con estos filtros.</p></div>';
@@ -1487,9 +1687,12 @@ async function verPreviaBoletin(idx, silencioso = false) {
   const esFinalAnual = periodoSeleccionado === "final";
   const numPeriodo = esFinalAnual ? 4 : parseInt(periodoSeleccionado);
 
-  // Obtener índices desde los headers reales de la hoja
-  const data = await fetchSheet(SHEETS.estudiantes);
-  const headers = data.values[0].map(h => h.trim());
+  // Usar los headers guardados en el momento en que se cargó la lista de estudiantes
+  // (evita desincronización de índices por caché entre fetchSheet y el array estudiantesBoletin)
+  const headers = headersEstudiantesBoletin.length > 0
+    ? headersEstudiantesBoletin
+    : (await fetchSheet(SHEETS.estudiantes, true)).values[0].map(h => h.trim());
+
   const iNombreB   = headers.findIndex(h => norm(h).includes('NOMBRE'));
   const iDocumento = headers.findIndex(h => norm(h) === 'ID_ESTUDIANTE' || norm(h).includes('DOCUMENTO'));
   const iSedeB     = headers.findIndex(h => norm(h) === 'SEDE');
@@ -1552,12 +1755,24 @@ async function verPreviaBoletin(idx, silencioso = false) {
       const iIndGra  = indHeaders.findIndex(h => norm(h) === 'GRADO');
       const iIndAsig = indHeaders.findIndex(h => norm(h) === 'ASIGNATURA');
       const iIndTxt  = indHeaders.findIndex(h => norm(h) === 'INDICADOR');
+      const iIndDoc  = indHeaders.findIndex(h => norm(h) === 'DOCENTE');
       indRows.forEach(row => {
         if (String(row[iIndPer]  || '').trim() !== String(periodoSeleccionado).trim()) return;
-        if (norm(String(row[iIndGra] || '')) !== norm(gradoEst)) return;
+        const gradoFila = String(row[iIndGra] || '').trim();
+        const gradoComp = String(gradoEst || '').trim();
+        if (!gradoFila || !gradoComp) return;
+        if (norm(gradoFila) !== norm(gradoComp)) return;
         const asig = (row[iIndAsig] || '').trim();
         const txt  = (row[iIndTxt]  || '').trim();
-        if (asig && txt) mapaIndicadores[norm(asig)] = txt;
+        if (!asig || !txt) return;
+        // Si hay docente en el indicador y en la fila del estudiante, filtrar por docente
+        if (iIndDoc >= 0 && filaEst) {
+          const docenteIndicador = String(row[iIndDoc] || '').trim();
+          const iColAsig = estHeaders.findIndex(h => norm(h) === norm(asig));
+          const docenteEstudiante = iColAsig >= 0 ? String(filaEst[iColAsig] || '').trim() : '';
+          if (docenteIndicador && docenteEstudiante && docenteIndicador !== docenteEstudiante) return;
+        }
+        mapaIndicadores[norm(asig)] = txt;
       });
     }
 
@@ -1659,22 +1874,43 @@ async function verPreviaBoletin(idx, silencioso = false) {
       }
     }
 
-    // 7. Ranking
+    // 7. Ranking — basado en PROMEDIO_GENERAL_Pn del Consolidado
     let ranking = '—';
     if (filaCons) {
-      const iPromedioR = consHeaders.findIndex(h =>
-        norm(h) === 'PROMEDIO DEL PERIODO' || norm(h) === 'PROMEDIO'
+      const colPGRank = 'PROMEDIO_GENERAL_P' + (esFinalAnual ? 4 : numPeriodo);
+      const iPGRank   = consHeaders.findIndex(h => norm(h) === norm(colPGRank));
+      // Fallback: buscar PROMEDIO DEL PERIODO o PROMEDIO
+      const iPromedioR = iPGRank >= 0 ? iPGRank : consHeaders.findIndex(h =>
+        norm(h) === 'PROMEDIO DEL PERIODO' || norm(h) === 'PROMEDIO_DEL_PERIODO' || norm(h) === 'PROMEDIO'
       );
       if (iPromedioR !== -1) {
         const iGradoCons    = consHeaders.findIndex(h => norm(h) === 'GRADO');
+        const iNomCons      = consHeaders.findIndex(h => norm(h).includes('NOMBRE'));
         const todosDelGrado = consRows.filter(row =>
           row[iGradoCons] && norm(row[iGradoCons]) === norm(gradoEst)
         );
-        const promedios  = todosDelGrado.map(row => parseFloat(row[iPromedioR]) || 0)
-                                         .filter(p => p > 0).sort((a, b) => b - a);
-        const miPromedio = parseFloat(filaCons[iPromedioR]) || 0;
-        const posicion   = promedios.indexOf(miPromedio) + 1;
-        ranking = todosDelGrado.length > 0 ? `${posicion}/${todosDelGrado.length}` : '—';
+
+        // Crear lista con promedio y nombre para desempate alfabético
+        const listaRanking = todosDelGrado
+          .map(row => ({
+            promedio: parseFloat(String(row[iPromedioR]||'').replace(',','.')) || 0,
+            nombre:   iNomCons >= 0 ? String(row[iNomCons]||'').trim() : ''
+          }))
+          .filter(e => e.promedio > 0)
+          .sort((a, b) => {
+            if (b.promedio !== a.promedio) return b.promedio - a.promedio;
+            return a.nombre.localeCompare(b.nombre); // desempate alfabético
+          });
+
+        const miPromedio = parseFloat(String(filaCons[iPromedioR]||'').replace(',','.')) || 0;
+        if (miPromedio > 0 && listaRanking.length > 0) {
+          // Posición: buscar la posición del estudiante actual
+          const miNombre = iNomCons >= 0 ? String(filaCons[iNomCons]||'').trim() : '';
+          const posicion = listaRanking.findIndex(e =>
+            e.promedio === miPromedio && e.nombre === miNombre
+          ) + 1;
+          ranking = posicion > 0 ? `${posicion}/${listaRanking.length}` : '—';
+        }
       }
     }
 
@@ -1778,19 +2014,19 @@ async function verPreviaBoletin(idx, silencioso = false) {
     // Encabezados de periodos
     let periodosHeader = '';
     for (let p = 1; p <= numPeriodo; p++) {
-      periodosHeader += `<th style="border:1px solid #ccc; padding:8px 10px; text-align:center; width:52px; background:#e8f5e9;">P${p}</th>`;
+      periodosHeader += `<th style="border:1px solid #ccc; padding:6px 8px; text-align:center; width:52px; background:rgba(232,245,233,0.75); font-size:11px;">P${p}</th>`;
     }
     const totalCols = 1 + 1 + numPeriodo + 1 + 1;
 
     let tablaHTML = `
-      <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:30px;">
+      <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:20px; line-height:1.25; background:transparent;">
         <thead>
           <tr>
-            <th style="border:1px solid #ccc; padding:10px 12px; text-align:left; background:#e8f5e9; width:220px;">ÁREA / ASIGNATURA</th>
-            <th style="border:1px solid #ccc; padding:8px 6px; text-align:center; background:#e8f5e9; width:48px;">Faltas</th>
+            <th style="border:1px solid #ccc; padding:6px 10px; text-align:left; background:rgba(232,245,233,0.75); width:220px; font-size:11px;">ÁREA / ASIGNATURA</th>
+            <th style="border:1px solid #ccc; padding:6px 6px; text-align:center; background:rgba(232,245,233,0.75); width:48px; font-size:11px;">Faltas</th>
             ${periodosHeader}
-            <th style="border:1px solid #ccc; padding:8px 6px; text-align:center; background:#e8f5e9; width:52px;">Recup.</th>
-            <th style="border:1px solid #ccc; padding:8px 10px; text-align:center; background:#e8f5e9; width:80px;">Desempeño</th>
+            <th style="border:1px solid #ccc; padding:6px 6px; text-align:center; background:rgba(232,245,233,0.75); width:52px; font-size:11px;">Recup.</th>
+            <th style="border:1px solid #ccc; padding:6px 10px; text-align:center; background:rgba(232,245,233,0.75); width:80px; font-size:11px;">Desempeño</th>
           </tr>
         </thead>
         <tbody>`;
@@ -1838,22 +2074,22 @@ async function verPreviaBoletin(idx, silencioso = false) {
 
       // Fila del área
       tablaHTML += `
-        <tr style="background:#d7eeda;">
-          <td style="border:1px solid #ccc; padding:5px 8px; font-weight:700; font-size:11px;">
+        <tr style="background:rgba(215,238,218,0.45);">
+          <td style="border:1px solid #ccc; padding:2px 6px; font-weight:700; font-size:10.5px; line-height:1.2;">
             ${area}
-            ${docenteArea ? `<span style="font-weight:500; font-size:11.5px; color:#2e7d32; display:block; margin-top:1px;">${docenteArea}</span>` : ''}
+            ${docenteArea ? `<span style="font-weight:500; font-size:11px; color:#2e7d32; display:block; margin-top:1px; line-height:1.2;">${docenteArea}</span>` : ''}
           </td>
-          <td style="border:1px solid #ccc; padding:8px 6px; text-align:center; font-weight:600;">${fallasAreaStr}</td>`;
+          <td style="border:1px solid #ccc; padding:2px 5px; text-align:center; font-weight:600;">${fallasAreaStr}</td>`;
 
       for (let p = 1; p <= numPeriodo; p++) {
         const notaP = esAreaUnica ? getNotaPeriodo(items[0].asignatura, p) : (p === numPeriodo ? notaAreaStr : '—');
-        tablaHTML += `<td style="border:1px solid #ccc; padding:8px 6px; text-align:center;
+        tablaHTML += `<td style="border:1px solid #ccc; padding:2px 6px; text-align:center;
           font-weight:700; color:${notaP === '—' ? '#aaa' : 'inherit'};">${notaP}</td>`;
       }
 
       tablaHTML += `
-          <td style="border:1px solid #ccc; padding:8px 6px; text-align:center; font-weight:600;">${recupArea}</td>
-          <td style="border:1px solid #ccc; padding:8px 10px; text-align:center; font-weight:700; color:${desempenoArea.color};">
+          <td style="border:1px solid #ccc; padding:2px 5px; text-align:center; font-weight:600;">${recupArea}</td>
+          <td style="border:1px solid #ccc; padding:2px 10px; text-align:center; font-weight:700; color:${desempenoArea.color};">
             ${notaFinalAreaStr !== '—' ? desempenoArea.texto : '—'}
           </td>
         </tr>`;
@@ -1862,9 +2098,9 @@ async function verPreviaBoletin(idx, silencioso = false) {
       if (esAreaUnica) {
         const indicador = mapaIndicadores[norm(items[0].asignatura)] || '';
         if (indicador) tablaHTML += `
-          <tr style="background:#f9fdf9;">
-            <td colspan="${totalCols}" style="border:1px solid #ccc; padding:5px 14px 7px 18px;
-                font-size:11.5px; font-style:italic; color:#3a5a3a; border-top:none;">
+          <tr style="background:rgba(249,253,249,0.55);">
+            <td colspan="${totalCols}" style="border:1px solid #ccc; padding:1.5px 12px 6px 16px;
+                font-size:11px; font-style:italic; color:#172417; border-top:none;">
               <span style="color:#888; font-style:normal; font-weight:600; margin-right:4px;">▸</span>${indicador}
             </td>
           </tr>`;
@@ -1885,23 +2121,23 @@ async function verPreviaBoletin(idx, silencioso = false) {
           const desempenoAsig = calcularDesempeno(notaAsigFinal);
 
           tablaHTML += `
-            <tr style="background:#ffffff;">
-              <td style="border:1px solid #ccc; padding:8px 12px 4px 22px; font-size:13px;">
+            <tr style="background:rgba(255,255,255,0.80);">
+              <td style="border:1px solid #ccc; padding:1.5px 8px 2px 14px; font-size:11.5px; line-height:1.2;">
                 <span style="font-weight:600;">${item.asignatura}</span>
-                ${docenteAsig ? `<span style="font-weight:400; font-size:11.5px; color:#2e7d32; display:block;">${docenteAsig}</span>` : ''}
+                ${docenteAsig ? `<span style="font-weight:400; font-size:10.8px; color:#2e7d32; display:block; line-height:1.2;">${docenteAsig}</span>` : ''}
               </td>
-              <td style="border:1px solid #ccc; padding:8px 6px; text-align:center;">${fallasAsig}</td>`;
+              <td style="border:1px solid #ccc; padding:1.5px 5px; text-align:center;">${fallasAsig}</td>`;
 
           for (let p = 1; p <= numPeriodo; p++) {
             const notaP = getNotaPeriodo(item.asignatura, p);
-            tablaHTML += `<td style="border:1px solid #ccc; padding:8px 6px; text-align:center;
+            tablaHTML += `<td style="border:1px solid #ccc; padding:1.5px 5px; text-align:center;
               color:${notaP === '—' ? '#aaa' : 'inherit'};">${notaP}</td>`;
           }
 
           tablaHTML += `
-              <td style="border:1px solid #ccc; padding:8px 6px; text-align:center;
+              <td style="border:1px solid #ccc; padding:1.5px 5px; text-align:center;
                 font-weight:${recupAsig !== '—' ? '600' : '400'};">${recupAsig}</td>
-              <td style="border:1px solid #ccc; padding:8px 10px; text-align:center;
+              <td style="border:1px solid #ccc; padding:1.5px 10px; text-align:center;
                 font-weight:600; color:${desempenoAsig.color};">
                 ${notaAsigFinal !== '—' ? desempenoAsig.texto : '—'}
               </td>
@@ -1909,9 +2145,9 @@ async function verPreviaBoletin(idx, silencioso = false) {
 
           const indicador = mapaIndicadores[norm(item.asignatura)] || '';
           if (indicador) tablaHTML += `
-            <tr style="background:#f9fdf9;">
-              <td colspan="${totalCols}" style="border:1px solid #ccc; padding:4px 14px 6px 28px;
-                  font-size:11.5px; font-style:italic; color:#3a5a3a; border-top:none;">
+            <tr style="background:rgba(249,253,249,0.55);">
+              <td colspan="${totalCols}" style="border:1px solid #ccc; padding:4px 12px 5px 22px;
+                  font-size:11px; font-style:italic; color:#172417; border-top:none;">
                 <span style="color:#888; font-style:normal; font-weight:600; margin-right:4px;">▸</span>${indicador}
               </td>
             </tr>`;
@@ -1921,28 +2157,29 @@ async function verPreviaBoletin(idx, silencioso = false) {
 
     tablaHTML += `</tbody></table>`;
 
-    const mensajeVacio = !filaCons ? `<div style="background:#fff3e0; border:1px solid #ff9800; color:#e65100; padding:15px; border-radius:8px; text-align:center; margin:20px 0;"><strong>⚠️ Sin calificaciones consolidadas aún</strong></div>` : '';
+    const mensajeVacio = !filaCons ? `<div style="background:#fff3e0; border:1px solid #ff9800; color:#e65100; padding:12px; border-radius:8px; text-align:center; margin:12px 0;"><strong>⚠️ Sin calificaciones consolidadas aún</strong></div>` : '';
 
     let htmlBoletin = `
-      <div style="max-width:100%; margin:0 auto; background:white; padding:20px 30px; font-family:'DM Sans',Arial,sans-serif; border:1px solid #ccc; border-radius:8px; box-shadow:0 5px 20px rgba(0,0,0,0.1);">
-        <div style="display:flex; align-items:center; margin-bottom:12px;">
-          <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" style="height:75px; margin-right:15px;">
+      <div style="max-width:100%; margin:0 auto; background:white; background-image:url('https://i.postimg.cc/4Np6dqtn/ESCUDO-IEAN-marca-de-agua.png'); background-repeat:no-repeat; background-position:center center; background-size:90%; padding:10px 12px; font-family:'DM Sans',Arial,sans-serif; font-size:12px; line-height:1.25; border:none; border-radius:0; box-shadow:none; position:relative; overflow:hidden;">
+        <div style="position:relative; z-index:1;">
+        <div style="display:flex; align-items:center; margin-bottom:6px;">
+          <img src="https://i.postimg.cc/66rx6xzQ/ESCUDO-IEAN-baja-resolucion.png" style="height:60px; margin-right:10px;">
           <div style="flex:1;">
-            <p style="margin:0; font-size:13px; font-weight:600; color:#1b5e20;">REPÚBLICA DE COLOMBIA - INSTITUCIÓN EDUCATIVA ANTONIO NARIÑO</p>
-            <p style="margin:4px 0 0; font-size:12px; color:#444;">CÓDIGO DANE: 273152000142 CASABIANCA TOLIMA<br>RESOLUCIÓN DE APROBACIÓN N.° 5097 DEL 01 DE AGOSTO DE 2018</p>
-            <h1 style="margin:6px 0 0; font-size:20px; color:#1b5e20; font-weight:700;">INFORME ACADÉMICO ${esFinalAnual ? '- FINAL ANUAL 2026' : `- PERIODO ${periodoSeleccionado} - 2026`}</h1>
+            <p style="margin:0; font-size:12px; font-weight:600; color:#1b5e20; line-height:1.2;">REPÚBLICA DE COLOMBIA - INSTITUCIÓN EDUCATIVA ANTONIO NARIÑO</p>
+            <p style="margin:2px 0 0; font-size:11px; color:#444; line-height:1.2;">CÓDIGO DANE: 273152000142 CASABIANCA TOLIMA<br>RESOLUCIÓN DE APROBACIÓN N.° 5097 DEL 01 DE AGOSTO DE 2018</p>
+            <h1 style="margin:4px 0 0; font-size:18px; color:#1b5e20; font-weight:700; line-height:1.1;">INFORME ACADÉMICO ${esFinalAnual ? '- FINAL ANUAL 2026' : `- PERIODO ${periodoSeleccionado} - 2026`}</h1>
           </div>
         </div>
 
-        <table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-size:13px;">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:12px; line-height:1.25;">
           <tr>
-            <td style="border:1px solid #ddd; padding:7px;"><strong>Estudiante:</strong> ${nombreEst}</td>
-            <td style="border:1px solid #ddd; padding:7px;"><strong>Documento:</strong> ${documento}</td>
-            <td style="border:1px solid #ddd; padding:7px;"><strong>Grado:</strong> ${gradoEst}</td>
+            <td style="border:1px solid #ddd; padding:6px 8px; font-size:12px;"><strong>Estudiante:</strong> ${nombreEst}</td>
+            <td style="border:1px solid #ddd; padding:6px 8px; font-size:12px;"><strong>Documento:</strong> ${documento}</td>
+            <td style="border:1px solid #ddd; padding:6px 8px; font-size:12px;"><strong>Grado:</strong> ${gradoEst}</td>
           </tr>
           <tr>
-            <td style="border:1px solid #ddd; padding:7px;"><strong>Sede:</strong> ${sedeEst}</td>
-            <td style="border:1px solid #ddd; padding:7px;" colspan="2"><strong>Director de Grado:</strong> ${directorGrado}</td>
+            <td style="border:1px solid #ddd; padding:6px 8px; font-size:12px;"><strong>Sede:</strong> ${sedeEst}</td>
+            <td style="border:1px solid #ddd; padding:6px 8px; font-size:12px;" colspan="2"><strong>Director de Grado:</strong> ${directorGrado}</td>
           </tr>
         </table>
 
@@ -1950,25 +2187,25 @@ async function verPreviaBoletin(idx, silencioso = false) {
         ${tablaHTML}
 
         <!-- Promedio General y Ranking (justificado a la derecha) -->
-        <div style="margin-top:8px; padding:8px 15px; background:#e8f5e9; border-radius:8px; text-align:right; font-size:13px;">
+        <div style="margin-top:6px; padding:6px 12px; background:rgba(232,245,233,0.95); border-radius:8px; text-align:right; font-size:12px;">
           <strong>Promedio General del Periodo:</strong> ${promedioGeneral} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <strong>Puesto:</strong> ${ranking}
         </div>
 
         <!-- Observaciones -->
-        <div style="margin-top:8px; padding:10px 15px; background:#f8f9fa; border-radius:8px; border-left:5px solid #388e3c; min-height:80px;">
-          <strong>Observaciones generales del Director de Grado:</strong><br><br>
+        <div style="margin-top:8px; padding:7px 12px; background:rgba(248,249,250,0.95); border-radius:8px; border-left:5px solid #388e3c; min-height:80px;">
+          <strong style="font-size:12px;">Observaciones generales:</strong><br><br>
           ${observacion || '<br>'}
         </div>
 
         <!-- Escala -->
-        <div style="margin-top:8px; padding:8px 15px; background:#f1f8e9; border-radius:8px; font-size:12px; text-align:center;">
+        <div style="margin-top:4px; padding:5px 12px; background:rgba(241,248,233,0.95); border-radius:8px; font-size:10.5px; text-align:center;">
           <strong>ESCALA DE VALORACIÓN:</strong><br>
           BAJO (1,0 - 2,9) &nbsp;&nbsp; BÁSICO (3,0 - 3,9) &nbsp;&nbsp; ALTO (4,0 - 4,5) &nbsp;&nbsp; SUPERIOR (4,6 - 5,0)
         </div>
 
         <!-- Firma -->
-        <div style="margin-top:15px; text-align:center;">
+        <div style="margin-top:60px; text-align:center;">
           <div style="border-top: 2px solid #333; width: 320px; margin: 0 auto 8px;"></div>
           <strong>${directorGrado}</strong><br>
           <span style="font-size:12px; color:#666;">Director de Grado</span>
@@ -1976,6 +2213,7 @@ async function verPreviaBoletin(idx, silencioso = false) {
 
         <div style="text-align:center; margin-top:10px; color:#666; font-size:12px;">
           Sistema P.A.R.C.E • Institución Educativa Antonio Nariño • 2026
+        </div>
         </div>
       </div>
     `;
@@ -2065,6 +2303,12 @@ async function cambiarPagina(page) {
     avisos:      'Avisos'
   };
   document.getElementById('page-title').textContent = titulos[page] || 'Panel Administrador';
+
+  // Cerrar sidebar en móvil al cambiar de página
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
 
   switch(page) {
     case 'dashboard':   await cargarDashboard();   break;
@@ -2256,15 +2500,18 @@ async function imprimirBoletines(modo) {
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', Arial, sans-serif; background: white; }
         .pagina-boletin {
           page-break-after: always;
           page-break-inside: avoid;
           padding: 0;
+          margin: 0;
         }
         .pagina-boletin:last-child { page-break-after: auto; }
-        @page { size: A4; margin: 2mm; }
+        @page { size: letter portrait; margin: 1.5cm; }
         @media print {
+          html, body { margin: 0; padding: 0; min-height: 100%; }
           .pagina-boletin { page-break-after: always; }
           .pagina-boletin:last-child { page-break-after: auto; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

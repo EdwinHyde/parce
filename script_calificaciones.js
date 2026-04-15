@@ -206,7 +206,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 
 document.getElementById('btn-logout').addEventListener('click', () => {
   if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-    window.location.href = 'Index.html';
+    window.location.href = 'index.html';
   }
 });
 
@@ -726,19 +726,27 @@ function calcularFila(idx) {
   const getVals = comp =>
     [...tr.querySelectorAll(`.nota-input[data-comp="${comp}"]`)].map(i => i.value);
 
-  const consSaber = promedio(getVals('saber'));
-  const consHacer = promedio(getVals('hacer'));
-  const consSer   = promedio(getVals('ser'));
+  // Promedio EXACTO sin redondeo (solo se redondea al mostrar y al guardar)
+  function promedioExacto(vals) {
+    const nums = vals.map(v => parseFloat(v)).filter(v => !isNaN(v) && v >= 1 && v <= 5);
+    if (nums.length === 0) return null;
+    return nums.reduce((a, b) => a + b, 0) / nums.length;
+  }
 
-  document.getElementById(`cons-s-${idx}`).textContent  = consSaber !== null ? consSaber.toFixed(1) : '—';
-  document.getElementById(`cons-h-${idx}`).textContent  = consHacer !== null ? consHacer.toFixed(1) : '—';
-  document.getElementById(`cons-sr-${idx}`).textContent = consSer   !== null ? consSer.toFixed(1)   : '—';
+  const consSaberExacto = promedioExacto(getVals('saber'));
+  const consHacerExacto = promedioExacto(getVals('hacer'));
+  const consSerExacto   = promedioExacto(getVals('ser'));
+
+  // Mostrar consolidados redondeados a 1 decimal (solo visual)
+  document.getElementById(`cons-s-${idx}`).textContent  = consSaberExacto !== null ? consSaberExacto.toFixed(1) : '—';
+  document.getElementById(`cons-h-${idx}`).textContent  = consHacerExacto !== null ? consHacerExacto.toFixed(1) : '—';
+  document.getElementById(`cons-sr-${idx}`).textContent = consSerExacto   !== null ? consSerExacto.toFixed(1)   : '—';
 
   let promFinal = null;
-  if (consSaber !== null && consHacer !== null && consSer !== null) {
-    promFinal = Math.round(
-      (consSaber * PESO_SABER + consHacer * PESO_HACER + consSer * PESO_SER) * 10
-    ) / 10;
+  if (consSaberExacto !== null && consHacerExacto !== null && consSerExacto !== null) {
+    // Calcular con valores EXACTOS y redondear SOLO el resultado final
+    const resultadoExacto = consSaberExacto * PESO_SABER + consHacerExacto * PESO_HACER + consSerExacto * PESO_SER;
+    promFinal = Math.round(resultadoExacto * 10) / 10;
   }
 
   const promCell = document.getElementById(`prom-${idx}`);
@@ -822,15 +830,22 @@ function recopilarDatos() {
     const tieneAlgo = [...saberVals, ...hacerVals, ...serVals, recVal].some(v => v !== '');
     if (!tieneAlgo) return;
 
-    const consSaber = promedio(saberVals);
-    const consHacer = promedio(hacerVals);
-    const consSer   = promedio(serVals);
+    // Promedio EXACTO sin redondeo prematuro (misma lógica que calcularFila)
+    function promedioExacto(vals) {
+      const nums = vals.map(v => parseFloat(v)).filter(v => !isNaN(v) && v >= 1 && v <= 5);
+      if (nums.length === 0) return null;
+      return nums.reduce((a, b) => a + b, 0) / nums.length;
+    }
+
+    const consSaberExacto = promedioExacto(saberVals);
+    const consHacerExacto = promedioExacto(hacerVals);
+    const consSerExacto   = promedioExacto(serVals);
 
     let promFinal = null;
-    if (consSaber !== null && consHacer !== null && consSer !== null) {
-      promFinal = Math.round(
-        (consSaber * PESO_SABER + consHacer * PESO_HACER + consSer * PESO_SER) * 10
-      ) / 10;
+    if (consSaberExacto !== null && consHacerExacto !== null && consSerExacto !== null) {
+      // Calcular con valores EXACTOS y redondear SOLO el resultado final
+      const resultadoExacto = consSaberExacto * PESO_SABER + consHacerExacto * PESO_HACER + consSerExacto * PESO_SER;
+      promFinal = Math.round(resultadoExacto * 10) / 10;
     }
 
     // Nota final: si hay recuperación, se toma la más alta entre promedio y recuperación
@@ -864,15 +879,15 @@ function recopilarDatos() {
       saber2:    saberVals[1] || '',
       saber3:    saberVals[2] || '',
       saber4:    saberVals[3] || '',
-      consSaber: consSaber !== null ? consSaber.toFixed(1) : '',
+      consSaber: consSaberExacto !== null ? consSaberExacto.toFixed(1) : '',
       hacer1:    hacerVals[0] || '',
       hacer2:    hacerVals[1] || '',
       hacer3:    hacerVals[2] || '',
       hacer4:    hacerVals[3] || '',
-      consHacer: consHacer !== null ? consHacer.toFixed(1) : '',
+      consHacer: consHacerExacto !== null ? consHacerExacto.toFixed(1) : '',
       ser1:      serVals[0] || '',
       ser2:      serVals[1] || '',
-      consSer:   consSer !== null ? consSer.toFixed(1) : '',
+      consSer:   consSerExacto !== null ? consSerExacto.toFixed(1) : '',
       rec:       recVal,
       promFinal:  promFinal  !== null ? promFinal.toFixed(1)  : '',
       notaFinal:  notaFinal  !== null ? notaFinal.toFixed(1)  : '',

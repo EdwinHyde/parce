@@ -71,12 +71,49 @@ const sedeDocente   = getUrlParameter('sede');
 document.getElementById('nombre-docente').textContent = nombreDocente || 'Docente';
 document.getElementById('perfil-sede').textContent    = sedeDocente   || 'Sede no asignada';
 
+// Cargar foto de perfil al iniciar la página
+(async function cargarFotoInicial() {
+  try {
+    const data = await fetchSheet('Usuarios');
+    if (data.error || !data.values || data.values.length < 2) return;
+
+    const headers = data.values[0].map(h => (h || '').trim());
+    const rows = data.values.slice(1);
+
+    const iNom = headers.findIndex(h => norm(h).includes('NOMBRE'));
+    const iApel = headers.findIndex(h => norm(h).includes('APELLIDO'));
+    const iFoto = headers.findIndex(h => norm(h) === 'FOTO_URL');
+
+    if (iNom < 0 || iFoto < 0) return;
+
+    // Buscar docente por nombre
+    for (const row of rows) {
+      const rowNom = norm(String(row[iNom] || ''));
+      let nombreCompleto = rowNom;
+      if (iApel >= 0) {
+        nombreCompleto = norm(String(row[iNom] || '') + ' ' + String(row[iApel] || ''));
+      }
+
+      if (nombreCompleto === norm(nombreDocente) || rowNom === norm(nombreDocente) ||
+          norm(nombreDocente).includes(rowNom) || rowNom.includes(norm(nombreDocente))) {
+        
+        const fotoUrl = obtenerUrlFoto(String(row[iFoto] || ''));
+        const inicial = (String(row[iNom] || '?')[0] || '?').toUpperCase();
+        actualizarAvatarHeader(fotoUrl, inicial);
+        break;
+      }
+    }
+  } catch (err) {
+    console.error('Error cargando foto inicial:', err);
+  }
+})();
+
 // ════════════════════════════════════════════════════════
 //  LOGOUT
 // ════════════════════════════════════════════════════════
 document.getElementById('btn-logout').addEventListener('click', () => {
   if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-    window.location.href = 'Index.html';
+    window.location.href = 'index.html';
   }
 });
 
@@ -1138,3 +1175,249 @@ function aplicarFiltrosConsulta() {
   document.getElementById(id).addEventListener('change', aplicarFiltrosConsulta);
 });
 document.getElementById('obs-filtro-nombre').addEventListener('input', aplicarFiltrosConsulta);
+// ════════════════════════════════════════════════════════
+//  MÓDULO PERFIL DOCENTE
+// ════════════════════════════════════════════════════════
+const SHEET_USUARIOS = "Usuarios";
+let perfilDocenteData = null; // datos cargados de la hoja Usuarios
+
+/**
+ * Actualiza el avatar circular en el header del docente
+ * @param {string|null} fotoUrl - URL de la foto o null
+ * @param {string} inicial - Inicial del nombre para mostrar si no hay foto
+ */
+function actualizarAvatarHeader(fotoUrl, inicial) {
+  const avatarContainer = document.getElementById('perfil-header-avatar');
+  if (!avatarContainer) return;
+
+  if (fotoUrl) {
+    // Mostrar imagen
+    avatarContainer.innerHTML = `<img src="${fotoUrl}" alt="Foto de perfil">`;
+  } else {
+    // Mostrar ícono genérico de perfil
+    avatarContainer.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    `;
+  }
+}
+
+document.getElementById('btn-mi-perfil').addEventListener('click', abrirPerfilDocente);
+document.getElementById('perfil-btn-close').addEventListener('click', cerrarPerfilDocente);
+document.getElementById('perfil-btn-cancelar').addEventListener('click', cerrarPerfilDocente);
+document.getElementById('perfil-overlay').addEventListener('click', function(e) {
+  if (e.target === this) cerrarPerfilDocente();
+});
+
+function abrirPerfilDocente() {
+  document.getElementById('perfil-overlay').style.display = 'flex';
+  document.getElementById('perfil-loading').style.display = 'flex';
+  document.getElementById('perfil-contenido').style.display = 'none';
+  document.getElementById('perfil-feedback').style.display = 'none';
+  cargarDatosPerfil();
+}
+
+function cerrarPerfilDocente() {
+  document.getElementById('perfil-overlay').style.display = 'none';
+  // Limpiar campos de contraseña
+  document.getElementById('perfil-edit-passact').value = '';
+  document.getElementById('perfil-edit-passnew').value = '';
+  document.getElementById('perfil-edit-passconf').value = '';
+}
+
+async function cargarDatosPerfil() {
+  try {
+    const data = await fetchSheet(SHEET_USUARIOS);
+    if (data.error || !data.values || data.values.length < 2) {
+      mostrarPerfilFeedback('No se pudieron cargar los datos del perfil.', 'error');
+      document.getElementById('perfil-loading').style.display = 'none';
+      return;
+    }
+
+    const headers = data.values[0].map(h => (h||'').trim());
+    const rows    = data.values.slice(1);
+
+    const iNom   = headers.findIndex(h => norm(h).includes('NOMBRE'));
+    const iDoc   = headers.findIndex(h => {
+      const n = norm(h).replace(/[\s_\-]/g,'');
+      return n === 'DOCUMENTO' || n === 'NODOCUMENTO' || n === 'NUMERODOCUMENTO' ||
+             n === 'CEDULA' || n === 'NUMERODECEDULA' || n === 'DOCIDENTIDAD';
+    });
+    const iSede  = headers.findIndex(h => norm(h) === 'SEDE');
+    const iRol   = headers.findIndex(h => norm(h) === 'ROL' || norm(h) === 'CARGO');
+    const iUser  = headers.findIndex(h => norm(h) === 'USUARIO');
+    const iPwd   = headers.findIndex(h => norm(h) === 'CONTRASENA');
+    const iTel   = headers.findIndex(h => norm(h) === 'TELEFONO' || norm(h) === 'CELULAR');
+
+    // Buscar por nombre del docente logueado (columna NOMBRE contiene nombre completo)
+    let filaDocente = null;
+    for (const row of rows) {
+      const rowNom = norm(String(row[iNom] || ''));
+      if (rowNom === norm(nombreDocente) ||
+          norm(nombreDocente).includes(rowNom) || rowNom.includes(norm(nombreDocente))) {
+        filaDocente = row;
+        break;
+      }
+    }
+
+    if (!filaDocente) {
+      mostrarPerfilFeedback('No se encontró tu registro en la base de datos.', 'error');
+      document.getElementById('perfil-loading').style.display = 'none';
+      document.getElementById('perfil-contenido').style.display = 'block';
+      return;
+    }
+
+    perfilDocenteData = { headers, row: filaDocente };
+
+    // Llenar campos de solo lectura
+    // La columna NOMBRE contiene el nombre completo (nombres + apellidos)
+    const nombres   = iNom >= 0  ? String(filaDocente[iNom]||'').trim()  : '—';
+    const documento = iDoc >= 0  ? String(filaDocente[iDoc]||'').trim()  : '—';
+    const sede      = iSede >= 0 ? String(filaDocente[iSede]||'').trim() : sedeDocente || '—';
+    const rol       = iRol >= 0  ? String(filaDocente[iRol]||'').trim()  : 'Docente';
+    const usuario   = iUser >= 0 ? String(filaDocente[iUser]||'').trim() : '';
+    const telefono  = iTel >= 0  ? String(filaDocente[iTel]||'').trim()  : '';
+
+    // Foto de perfil
+    const iFoto = headers.findIndex(h => norm(h) === 'FOTO_URL');
+    const fotoUrl = iFoto >= 0 ? obtenerUrlFoto(String(filaDocente[iFoto]||'')) : null;
+
+    // Actualizar avatar en el header
+    actualizarAvatarHeader(fotoUrl, (nombres[0] || '?').toUpperCase());
+
+    // Crear widget de foto
+    if (typeof crearWidgetFotoPerfil === 'function') {
+      crearWidgetFotoPerfil({
+        containerId: 'perfil-foto-widget',
+        fotoUrl: fotoUrl,
+        iniciales: (nombres[0] || '?').toUpperCase(),
+        tipoUsuario: 'docente',
+        identificador: documento || nombreDocente,
+        onSubida: async (url) => {
+          // Guardar URL en Sheets
+          try {
+            await fetch(APPS_SCRIPT_URL, {
+              method: 'POST',
+              body: JSON.stringify({
+                tipo: 'guardarFotoUrl',
+                tipoUsuario: 'docente',
+                nombre: nombreDocente,
+                identificador: documento,
+                fotoUrl: url
+              })
+            });
+            // Actualizar avatar en el header con la nueva foto
+            actualizarAvatarHeader(url, (nombres[0] || '?').toUpperCase());
+          } catch(e) { console.error('Error guardando URL de foto:', e); }
+        }
+      });
+    }
+
+    document.getElementById('perfil-nombres').textContent    = nombres;
+    document.getElementById('perfil-documento').textContent  = documento || '—';
+    document.getElementById('perfil-sede-val').textContent   = sede;
+    document.getElementById('perfil-rol').textContent        = rol;
+
+    // Llenar campos editables
+    document.getElementById('perfil-edit-usuario').value  = usuario;
+    document.getElementById('perfil-edit-telefono').value  = telefono;
+
+    document.getElementById('perfil-loading').style.display   = 'none';
+    document.getElementById('perfil-contenido').style.display = 'block';
+
+  } catch(err) {
+    console.error('Error cargando perfil:', err);
+    mostrarPerfilFeedback('Error de conexión al cargar el perfil.', 'error');
+    document.getElementById('perfil-loading').style.display = 'none';
+  }
+}
+
+// ── Guardar perfil ──
+document.getElementById('perfil-btn-guardar').addEventListener('click', guardarPerfilDocente);
+
+async function guardarPerfilDocente() {
+  const nuevoUsuario  = document.getElementById('perfil-edit-usuario').value.trim();
+  const nuevoTelefono = document.getElementById('perfil-edit-telefono').value.trim();
+  const passActual    = document.getElementById('perfil-edit-passact').value;
+  const passNueva     = document.getElementById('perfil-edit-passnew').value;
+  const passConf      = document.getElementById('perfil-edit-passconf').value;
+
+  // Validaciones
+  if (!nuevoUsuario) {
+    mostrarPerfilFeedback('El campo de usuario no puede estar vacío.', 'error');
+    return;
+  }
+
+  let cambiarPass = false;
+  if (passNueva || passConf || passActual) {
+    if (!passActual) {
+      mostrarPerfilFeedback('Debes ingresar tu contraseña actual para cambiarla.', 'error');
+      return;
+    }
+    if (passNueva !== passConf) {
+      mostrarPerfilFeedback('La nueva contraseña y su confirmación no coinciden.', 'error');
+      return;
+    }
+    if (passNueva.length < 6) {
+      mostrarPerfilFeedback('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+      return;
+    }
+    cambiarPass = true;
+  }
+
+  const btn = document.getElementById('perfil-btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  btn.style.opacity = '0.7';
+
+  try {
+    const payload = {
+      tipo: 'actualizarPerfilDocente',
+      nombre: nombreDocente,
+      documento: document.getElementById('perfil-documento').textContent,
+      nuevoUsuario,
+      nuevoTelefono
+    };
+
+    if (cambiarPass) {
+      payload.contrasenaActual = passActual;
+      payload.nuevaContrasena  = passNueva;
+    }
+
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const json = await resp.json();
+
+    if (json.status === 'ok') {
+      mostrarPerfilFeedback('✓ Perfil actualizado correctamente.', 'ok');
+      // Limpiar campos de contraseña
+      document.getElementById('perfil-edit-passact').value = '';
+      document.getElementById('perfil-edit-passnew').value = '';
+      document.getElementById('perfil-edit-passconf').value = '';
+    } else {
+      mostrarPerfilFeedback(json.mensaje || 'Error al guardar los cambios.', 'error');
+    }
+  } catch(err) {
+    mostrarPerfilFeedback('Error de conexión. Verifica tu red e intenta de nuevo.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
+    btn.style.opacity = '1';
+  }
+}
+
+function mostrarPerfilFeedback(msg, tipo) {
+  const el = document.getElementById('perfil-feedback');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = tipo === 'ok' ? '#e8f5e9' : '#ffebee';
+  el.style.color      = tipo === 'ok' ? '#2e7d32' : '#c62828';
+  el.style.border     = tipo === 'ok' ? '1px solid #a5d6a7' : '1px solid #ef9a9a';
+  if (tipo === 'ok') {
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+}

@@ -138,8 +138,8 @@ body {
   -webkit-backdrop-filter: blur(14px);
   border: var(--glass-border);
   border-radius: var(--radius-lg);
-  padding: 28px 32px;
-  margin-bottom: 28px;
+  padding: 20px 24px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -173,7 +173,61 @@ body {
   color: var(--iean-dark);
 }
 
-/* Badge de rol */
+/* ════════════════════════════════════════
+   PERFIL HEADER (avatar circular)
+════════════════════════════════════════ */
+.welcome-avatar-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.perfil-header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.perfil-header-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--iean-pale);
+  border: 3px solid var(--iean-light);
+  color: var(--iean-main);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.perfil-header-btn:hover .perfil-header-avatar {
+  border-color: var(--iean-main);
+  transform: scale(1.2);
+}
+
+.perfil-header-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.perfil-header-avatar svg {
+  width: 36px;
+  height: 36px;
+}
+
+.perfil-header-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--iean-dark);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Badge de rol (mantener para compatibilidad) */
 .role-badge {
   display: inline-flex;
   align-items: center;
@@ -682,6 +736,18 @@ body {
   .stat-value {
     font-size: 25px;
   }
+
+  /* Perfil header tamaño tablet+ */
+  .perfil-header-avatar {
+    width: 90px;
+    height: 90px;
+    border-width: 3px;
+  }
+
+  .perfil-header-avatar svg {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -720,6 +786,37 @@ body {
 
 @media (max-width: 480px) {
   .brand-desc { display: none; }
+
+  /* Perfil header responsive */
+  .perfil-header-avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .perfil-header-avatar svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .welcome-section {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .welcome-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .welcome-avatar-wrap {
+    flex-shrink: 0;
+  }
+
+  .welcome-text h1 {
+    font-size: 22px;
+    word-break: break-word;
+  }
 }
 /* ════════════════════════════════════════
    MÓDULO OBSERVACIONES — OVERLAY & PANEL
@@ -1316,4 +1413,60 @@ body {
   background: #fff1f0; color: #c0392b;
   font-size: 11px; font-weight: 700;
   padding: 2px 8px; border-radius: 99px;
+}
+/* ════════════════════════════════════════════════════════
+   PERFIL DOCENTE
+   ════════════════════════════════════════════════════════ */
+.perfil-campo-readonly {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border: 1px solid #eee;
+}
+.perfil-campo-readonly .perfil-label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.perfil-campo-readonly .perfil-valor {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+.perfil-campo-edit {
+  margin-bottom: 10px;
+}
+.perfil-campo-edit .perfil-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.perfil-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'DM Sans', Arial, sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  background: #fff;
+}
+.perfil-input:focus {
+  outline: none;
+  border-color: #1b5e20;
+  box-shadow: 0 0 0 3px rgba(27,94,32,0.1);
+}
+.perfil-input::placeholder {
+  color: #bbb;
 }

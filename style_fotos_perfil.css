@@ -1,0 +1,102 @@
+/* ════════════════════════════════════════════════════════
+   PARCE — Widget de Foto de Perfil (Supabase)
+   ════════════════════════════════════════════════════════ */
+
+.foto-perfil-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.foto-perfil-avatar-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.foto-perfil-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e0e0e0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.foto-perfil-iniciales {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #1b5e20, #388e3c);
+  border: 3px solid #e0e0e0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.foto-perfil-cambiar {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 30px;
+  height: 30px;
+  background: #1b5e20;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.2s, transform 0.2s;
+  border: 2px solid #fff;
+}
+
+.foto-perfil-cambiar:hover {
+  background: #2e7d32;
+  transform: scale(1.08);
+}
+
+.foto-perfil-cambiar svg {
+  stroke: #fff;
+}
+
+.foto-perfil-status {
+  margin-top: 8px;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.foto-status-loading {
+  color: #1565c0;
+  background: #e3f2fd;
+}
+
+.foto-status-ok {
+  color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.foto-status-error {
+  color: #c62828;
+  background: #ffebee;
+}
+
+/* Variante para orientador (colores azul) */
+.orientador-theme .foto-perfil-iniciales {
+  background: linear-gradient(135deg, #0d47a1, #1565c0);
+}
+.orientador-theme .foto-perfil-cambiar {
+  background: #0d47a1;
+}
+.orientador-theme .foto-perfil-cambiar:hover {
+  background: #1565c0;
+}
